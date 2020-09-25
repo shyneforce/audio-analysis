@@ -26,6 +26,7 @@ The project is open source and licensed under the Apache License 2.0.
    - [Downloading](xref:basics-installing) AnalysisPrograms.exe
    - Running the program
    - Understanding concepts
+   - Do-it-yourself call recognizers
 - See the **[Issues list](https://github.com/QutEcoacoustics/audio-analysis/issues)** for
   - reporting bugs
   - requesting new features
