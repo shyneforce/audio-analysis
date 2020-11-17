@@ -1,16 +1,17 @@
-# Welcome to "DIY Call Recognizer" in Ecosounds Analysis Programs
+# Welcome to "DIY Recognizer" in Ecosounds Analysis Programs
 
-File to be called <DIY_CallRecognizersUsingAP.md>.
+File: DIY_CallRecognizersUsingAP.md
          
-**Analysis Programs** is a command line program to analyse long-duration audio-recordings of the enviornment. The AnalysisPrograms.exe (abbreviated here on in to AP) contains many sub-programs, one of which is the ability to write your own call recognizers.
+**DIY Recognizer** is a utility within **Analysis Programs**, a command line program that analyses long-duration audio-recordings of the enviornment. AnalysisPrograms.exe (abbreviated from here to AP) contains many sub-programs, one of which provides you with the ability to write your own call recognizers. This manual describes only how to write a **DIY recognizer**.
 
-##Why bother with a DIY call recognizer?
+**Why bother with a DIY recognizer?**
+
 There are three levels of sophistication in call recognizers:
 1. The simplist is the handcrafted template.
-2. More powerful is a machine learning approach.
+2. More powerful is a machine learned model.
 3. The current cutting edge of call recognizers is a deep-learning approach using a convolutional neural network.
 
-Hand-crafted, *rule-based* templates can be built using just one or a few examples of the target call. But like any rule-based *AI* system they are *brittle*, that is, they break easily if the target call falls even slightly outside the bounds of the rules. A machine-learned model, for example an SVM or Random Forest, is far more resilient to slight changes in the range of the target call but they require many more training examples, on the order of 100 training examples. Finally, the convolutional neural network is most powerful learning machine availble today (2020) but this power is achieved only by supplying thousands of examples of the each target call. To summarise (and at the risk of over-simplification), a hand-crafted template has low cost and low benefit; a machine-learned model has medium cost and medium benefit, while a deep-learned model has high cost and high benefit. The cost/benefit in each case is similar but here is the rub - the cost must be paid before you get the benefit. Furthermore, in a typical ecological study, a bird is of interest precisely because the species is threatened or cryptgic - in other words not many calls are available, therefore making the more sophisticated approaches untenable. Hence there is a place for hand-crafted templates in call recognition. 
+Hand-crafted, *rule-based* templates can be built using just one or a few examples of the target call. But like any rule-based *AI* system they are *brittle*, that is, they break easily if the target call falls even slightly outside the bounds of the rules. A machine-learned model, for example an SVM or Random Forest, is far more resilient to slight changes in the range of the target call but they require many more training examples, on the order of 100 training examples. Finally, the convolutional neural network is the most powerful learning machine available today (2020) but this power is achieved only by supplying thousands of examples of the each target call. To summarise (and at the risk of over-simplification), a hand-crafted template has low cost and low benefit; a machine-learned model has medium cost and medium benefit, while a deep-learned model has high cost and high benefit. The cost/benefit ratio in each case is similar but here is the catch - the cost must be paid before you get the benefit! Furthermore, in a typical ecological study, a bird is of interest precisely because the species is threatened or cryptgic - in other words not many calls are available, therefore making the more sophisticated approaches untenable. Hence there is a place for hand-crafted templates in call recognition. 
 
 **The advantages of a hand-crafted DIY call recognizer:**
 1. You can do it yourself!
@@ -26,8 +27,8 @@ Hand-crafted, *rule-based* templates can be built using just one or a few exampl
 5. Call filtering
 6. Saving Results
 
-In order to execute these steps correctly for your call of interest, you must enter suitable parameter values into a *config.yml* file. The name of this file is passed as an argument to AP.exe which reads the file and executes the recognition steps. The command line will be explained subsequently. We now describe how to set the parameters for each of the five recognition steps, using as a concrete example the config file for the Boobook Owl, *Ninox boobook*.
-Note that the config filename must have the correct structure in order to be recognized by AP.exe, in this case `Towsey.NinoxBoobook.yml`. `Towsey` is the author of the yml file (you can change this to your name) and `NinoxBoobook` is the scientific name of the target species. 
+In order to execute these steps correctly for your call of interest, you must enter suitable parameter values into a *config.yml* file. The name of this file is passed as an argument to AP.exe which reads the file and executes the recognition steps. The command line will be explained subsequently. We now describe how to set the parameters for each of the six recognition steps, using as a concrete example the config file for the Boobook Owl, *Ninox boobook*.
+Note that the config filename must have the correct structure in order to be recognized by AP.exe, in this case `Towsey.NinoxBoobook.yml`. `Towsey` is the author of the yml file (you can change this to your name) and `NinoxBoobook` is the scientific name (without spaces) of the target species. 
 
 ## 1. Recording Segmentation
 
