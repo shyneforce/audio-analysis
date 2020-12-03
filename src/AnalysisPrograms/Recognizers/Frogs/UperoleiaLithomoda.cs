@@ -51,11 +51,15 @@ namespace AnalysisPrograms.Recognizers.Frogs
     /// </summary>
     internal class UperoleiaLithomoda : RecognizerBase
     {
-        public override string Description => "[ALPHA/EMBRYONIC] Detects acoustic events of Uperoleia lithomoda.";
+        public override string Description => "Detects acoustic events of Uperoleia lithomoda.";
 
         public override string Author => "Towsey";
 
         public override string SpeciesName => "UperoleiaLithomoda";
+
+        public override string CommonName => "Stonemason's toadlet";
+
+        public override Status Status => Status.InDevelopment;
 
         //private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 

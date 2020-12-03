@@ -46,11 +46,15 @@ namespace AnalysisPrograms.Recognizers.Frogs
     /// </summary>
     internal class UperoleiaMimula : RecognizerBase
     {
-        public override string Description => "[ALPHA/EMBRYONIC] Detects acoustic events of Uperoleia mimula.";
+        public override string Description => "Detects acoustic events of Uperoleia mimula.";
 
         public override string Author => "Towsey";
 
         public override string SpeciesName => "UperoleiaMimula";
+
+        public override string CommonName => "Mimic toadlet";
+
+        public override Status Status => Status.InDevelopment;
 
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 

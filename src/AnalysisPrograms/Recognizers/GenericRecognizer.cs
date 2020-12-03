@@ -43,9 +43,11 @@ namespace AnalysisPrograms.Recognizers
         public override string SpeciesName => "GenericRecognizer";
 
         /// <inheritdoc />
-        public override string Description => "[ALPHA] Finds acoustic events with generic component detection algorithms";
+        public override string Description => "Finds acoustic events with generic component detection algorithms";
 
         public override string CommonName => "Generic Recognizer";
+
+        public override Status Status => Status.Maintained;
 
         /// <inheritdoc />
         public override AnalyzerConfig ParseConfig(FileInfo file)

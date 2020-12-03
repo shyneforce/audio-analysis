@@ -44,11 +44,15 @@ namespace AnalysisPrograms.Recognizers.Frogs
 
     public class LitoriaWatjulumensis : RecognizerBase
     {
-        public override string Description => "[ALPHA/EMBRYONIC] Detects acoustic events of Litoria watchamacallit.";
+        public override string Description => "Detects acoustic events of Litoria watchamacallit.";
 
         public override string Author => "Towsey";
 
         public override string SpeciesName => "LitoriaWatjulumensis";
+
+        public override string CommonName => "Wotjulum frog";
+
+        public override Status Status => Status.InDevelopment;
 
         public string SpeciesInitials = "L.w";
 

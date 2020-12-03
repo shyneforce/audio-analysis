@@ -39,7 +39,7 @@ namespace AnalysisPrograms.Recognizers.Frogs
     /// </summary>
     public class LimnodynastesConvex : RecognizerBase
     {
-        public override string Description => "[ALPHA/EMBRYONIC] Detects acoustic events of Limnodynastes convex";
+        public override string Description => "Detects acoustic events of Limnodynastes convex";
 
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -48,7 +48,11 @@ namespace AnalysisPrograms.Recognizers.Frogs
 
         public override string Author => "Towsey";
 
-        public override string SpeciesName => "LimnodynastesConvex";
+        public override string SpeciesName => "Limnodynastes convexiusculus";
+
+        public override string CommonName => "Marbled Frog";
+
+        public override Status Status => Status.InDevelopment;
 
         /// <summary>
         /// Summarize your results. This method is invoked exactly once per original file.

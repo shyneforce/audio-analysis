@@ -44,11 +44,15 @@ namespace AnalysisPrograms.Recognizers.Frogs
     /// </summary>
     internal class CycloranaNovaehollandiae : RecognizerBase
     {
-        public override string Description => "[ALPHA/In development] Cyclorana novaehollandiae. See class header for algorithm description.";
+        public override string Description => "Cyclorana novaehollandiae. See class header for algorithm description.";
 
         public override string Author => "Towsey";
 
         public override string SpeciesName => "CycloranaNovaehollandiae";
+
+        public override string CommonName => "New Holland frog";
+
+        public override Status Status => Status.InDevelopment;
 
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 

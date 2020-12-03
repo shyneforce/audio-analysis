@@ -49,11 +49,15 @@ namespace AnalysisPrograms.Recognizers.Frogs
     /// </summary>
     internal class PlatyplectrumOrnatum : RecognizerBase
     {
-        public override string Description => "[ALPHA/EMBRYONIC] Detects acoustic events of Platyplectrum ornatum.";
+        public override string Description => "Detects acoustic events of Platyplectrum ornatum.";
 
         public override string Author => "Towsey";
 
         public override string SpeciesName => "PlatyplectrumOrnatum";
+
+        public override string CommonName => "Ornate burrowing frog";
+
+        public override Status Status => Status.Alpha;
 
         //private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 

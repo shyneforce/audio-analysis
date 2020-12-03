@@ -39,11 +39,15 @@ namespace AnalysisPrograms.Recognizers.Frogs
     /// </summary>
     internal class UperoleiaInundata : RecognizerBase
     {
-        public override string Description => "[ALPHA/EMBRYONIC] Detects acoustic events of Uperoleia inundata.";
+        public override string Description => "Detects acoustic events of Uperoleia inundata.";
 
         public override string Author => "Towsey";
 
         public override string SpeciesName => "UperoleiaInundata";
+
+        public override string CommonName => "Flood plain toadlet";
+
+        public override Status Status => Status.InDevelopment;
 
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
