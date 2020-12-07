@@ -2,15 +2,11 @@
 // <copyright file="Interval.cs" company="QutEcoacoustics">
 // All code in this file and all associated files are the copyright and property of the QUT Ecoacoustics Research Group (formerly MQUTeR, and formerly QUT Bioacoustics Research Group).
 // </copyright>
-// <summary>
-//   Range of Min-Max.
-// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Acoustics.Shared
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
 
     public enum Topology : byte
     {
@@ -57,7 +53,7 @@ namespace Acoustics.Shared
 
             this.Minimum = minimum;
             this.Maximum = maximum;
-            this.Topology = Topology.Default;
+            this.Topology = default;
         }
 
         public Interval(T minimum, T maximum, Topology topology)
@@ -143,7 +139,7 @@ namespace Acoustics.Shared
             return !(first == second);
         }
 
-        public bool Contains(T scalar, Topology type = Topology.Default)
+        public bool Contains(T scalar, Topology type = default)
         {
             return ScalarEqualOrGreaterThanAnchor(scalar, this.Minimum, this.IsMinimumInclusive) &&
                    ScalarEqualOrLessThanAnchor(scalar, this.Maximum, this.IsMaximumInclusive);

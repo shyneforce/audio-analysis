@@ -58,6 +58,7 @@ namespace Acoustics.Shared.Csv
         {
             // Registers CsvHelper type converters that can allow serialization of complex types.
             InternalConfig.TypeConverterCache.AddConverter<ISet<Point>>(new CsvSetPointConverter());
+            InternalConfig.TypeConverterCache.AddConverter<Topology>(new TopologyEnumConverter());
 
             // ensure dates are always formatted as ISO8601 dates - note: R cannot by default parse proper ISO8601 dates
             var typeConverterOptions = new TypeConverterOptions()
@@ -140,7 +141,7 @@ namespace Acoustics.Shared.Csv
             {
                 var configuration = DefaultConfiguration;
                 configuration.MissingFieldFound = throwOnMissingField ? ConfigurationFunctions.MissingFieldFound : (Action<string[], int, ReadingContext>)null;
-                configuration.HeaderValidated = throwOnMissingField ? ConfigurationFunctions.HeaderValidated : (Action<bool, string[], int, ReadingContext>)null;
+                configuration.HeaderValidated = throwOnMissingField ? ConfigurationFunctions.HeaderValidated : (Action<InvalidHeader[], ReadingContext>)null;
                 var reader = new CsvReader(stream, configuration);
 
                 IEnumerable<T> results = reader.GetRecords<T>();
