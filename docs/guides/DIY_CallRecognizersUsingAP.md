@@ -5,19 +5,18 @@
 **DIY Call Recognizer** is a utility within **Analysis Programs**, a command line program that analyses long-duration audio-recordings of the enviornment. `AnalysisPrograms.exe` (abbreviated from here to AP) contains many sub-programs, one of which provides you with the ability to write your own call recognizers. This manual describes how to write a **DIY call recognizer**. Refer to other manuals for other functionality.
 
 ## Contents ##
-- A: Why bother with a DIY recognizer?
+- A: Why bother with a DIY call recognizer?
 - B: Calls, syllables, harmonics
 - C: Acoustic events
 - D: Seven kinds of acoustic event
 - E: Configuration files
-- F: Six steps to detect a call using DIY Call Recognizer
-- G: An efficient strategy to tune parameters
-- H: Seven Stages to Building a DIY Call Recognizer
-- I: The DIY Call Recognizer command line
+- F: An efficient strategy to tune parameters
+- G: Seven Stages to Building a DIY Call Recognizer
+- H: The DIY Call Recognizer command line
 
 
 ==============================================================
-## A: Why bother with a DIY recognizer?**
+## A: Why bother with a DIY call recognizer?
 
 There are three levels of sophistication in call recognizers:
 1. The simplist is the handcrafted template.
@@ -40,9 +39,9 @@ Hand-crafted, *rule-based* templates can be built using just one or a few exampl
 
  **Note**: The following two rules apply to the preparation of datsets, regardless of the recognizer type.
 
- **Rule 1**: Rubbush in => rubbish out!! That is, think about your chosen training/test examples carefully.
+ - **Rule 1**: Rubbush in => rubbish out!! That is, think about your chosen training/test examples carefully.
 
- **Rule 2**: Training and test sets should be representative (in some loose statistical sense) of the intended operational environment.
+-  **Rule 2**: Training and test sets should be representative (in some loose statistical sense) of the intended operational environment.
 
 
 To summarise (and at the risk of over-simplification), a hand-crafted template has low cost and low benefit; a machine-learned model has medium cost and medium benefit, while a deep-learned model has high cost and high benefit. The cost/benefit ratio in each case is similar but here is the catch - the cost must be paid before you get the benefit! Furthermore, in a typical ecological study, a bird species is of interest precisely because it is threatened or cryptic. When not many calls are available, the more sophisticated approaches become untenable. Hence there is a place for hand-crafted templates in call recognition.
@@ -64,7 +63,7 @@ These thoughts are summarised in the following table:
 4. Exposes the variability of the target call. 
 
 ## B: Calls, syllables, harmonics
-The algorithmic approach of **DIY Call Recognizer** reflects particular assumptions about animals calls and how they are structured. A *call* is taken to be any sound of animal origin (whether for communication purposes or not) and includes bird songs/calls, animal vocalisations of any kind, the stridulation of insects, the wingbeats of birds and bats and the various sounds produced by acquatic animals. Calls typically have temporal and spectral structure. For example they may consist of a temporal sequence of two or more syllables (with "gaps" in between) or a set of simultaneous *harmonics* or *formants*. (The distinction between harmonics and formants does not concern us here.)
+The algorithmic approach of **DIY Call Recognizer** reflects particular assumptions about animals calls and how they are structured. A *call* is taken to be any sound of animal origin (whether for communication purposes or not) and includes bird songs/calls, animal vocalisations of any kind, the stridulation of insects, the wingbeats of birds and bats and the various sounds produced by acquatic animals. Calls typically have temporal and spectral structure. For example they may consist of a temporal sequence of two or more *syllables* (with "gaps" in between) or a set of simultaneous *harmonics* or *formants*. (The distinction between harmonics and formants does not concern us here.)
 
 **DIY Call Recognizer** attempts to recognizer calls in a noise-reduced spectrogram, which is processed as a matrix of real values and visualised as a grey-scale image. Each row of pixels is a frqeuency bin and each column of pixels is a time-frame. The value in each spectrogram/matrix cell (represented by an image pixel) is the acoustic intensity in decibels with respect to the background noise baseline. Note that the decibel values in a noise-reduced spectrogram are always positive.
 
@@ -95,14 +94,17 @@ Note that each of the above five acoustic events are "simple" or "singular" even
 An oscillation is the same (or nearly the same) syllable (typically whips or clicks) repeated at a fixed periodicity over several to many time-frames.
 
 ### 7: Harmonics
-Harmonics are the same/similar shaped *whistle* or *chirp* repeated simultaneously at multiple intervals of frequency. Typically, the frequency interval is constant as one ascends the stack of harmonics.
+Harmonics are the same/similar shaped *whistle* or *chirp* repeated simultaneously at multiple intervals of frequency. Typically, the frequency intervals are similar as one ascends the stack of harmonics.
 
 ![Seven Kinds Of Acoustic Event](./Images/SevenKindsOfAcousticEvent.png)
 
 ## E: Configuration files
-All the above seven types of acoustic event have distinct properties that define their temporal duration, bandwidth, intensity. In fact, an acoustic event is, by definition, enclosed by a rectangle/marquee whose height represents the bandwidth of the event and whose width represents the duration of the event. Even a chirp or whip which consists only of a single *spectral track*, is enclosed by a rectangle, two of whose vertices sit at the start and end of the track.  
+In order to find calls of interest in a recording, you must tell **DIY Call Recognizer** what kinds of acoustic events (syllables and harmonics) make up the target calls. You do this using a configuration file.   
 
-## F: Six steps to detect a call using DIY Call Recognizer ## 
+@SOMEthiNG MORE ON CONFIGURATION FILES IS reQUIreD HErE.
+
+Given an acoustic recording, there are six steps to finding calls 
+### Six steps to detect a call using DIY Call Recognizer ## 
 1. Recording segmentation
 2. Spectrogram preparation
 3. Call syllable detection
@@ -110,7 +112,7 @@ All the above seven types of acoustic event have distinct properties that define
 5. Call filtering
 6. Saving Results
 
-In order to execute these steps correctly for your call of interest, you must enter suitable parameter values into a *config.yml* file. The name of this file is passed as an argument to AP.exe which reads the file and executes the recognition steps. The command line will be explained subsequently. We now describe how to set the parameters for each of the six recognition steps, using as a concrete example the config file for the Boobook Owl, *Ninox boobook*.
+In order to execute these steps correctly for your target call, you must enter suitable parameter values into a *config.yml* file. The name of this file is passed as an argument to AP.exe which reads the file and executes the recognition steps. The command line will be explained subsequently. We now describe how to set the parameters for each of the six recognition steps, using as a concrete example the config file for the Boobook Owl, *Ninox boobook*.
 Note that the config filename must have the correct structure in order to be recognized by AP, in this case `Towsey.NinoxBoobook.yml`. `Towsey` is the author of the yml file (you can change this to your name) and `NinoxBoobook` is the scientific name (must be without spaces) of the target species. 
 
 The parameters are described below. The parameter name is given in bold followed by a typical or default value for the parameter. A description of the parameter is given on the following line(s).
@@ -145,7 +147,7 @@ The default value for **WindowFunction** is HANNING. There should no need to eve
 ![Templates have parameters](./Images/TemplatesHaveParameters.png)
 
 ## 3. Call syllable detection
- Each of these profiles will be analyzed.
+All the above seven types of acoustic event are characterised by distinct properties such as their temporal duration, bandwidth, intensity. In fact, every acoustic event is bounded by a rectangle or marquee whose height represents the bandwidth of the event and whose width represents the duration of the event. Even a chirp or whip which consists only of a single *spectral track*, is enclosed by a rectangle, two of whose vertices sit at the start and end of the track. Each of these profiles will be analyzed.
 
 *IMPORTANT NOTE: The indentation in these config.yml files is very important and should be retained. 
 
@@ -244,7 +246,7 @@ DisplayCsvImage: False
 HighResolutionIndicesConfig "../File.Name.HiResIndicesForRecognisers.yml"
 ```
 
-## G: An efficient strategy to tune parameters
+## F: An efficient strategy to tune parameters
 
 It will save you a lot of time if you tune the parameters in a logical sequence. The idea is to tune parameters in the sequence in which they appear in the *config.yml* file, but keep all "downstream" parameters as broad as possible. Here we summarize the strategy in five steps.
 
@@ -283,7 +285,7 @@ At the end of this process, you are likely to havea mixture of true positives, f
 **NOTE:** You are able to build a working DIY Call Recognizer with a few (even one) example/training call(s). A machine learning algorithm requires typically 100 true and false examples. The price you (as an ecologist) pay for this simplicity is that you have to exercise some of the "intelligence" that would be exercised by the machine learning algorithm. That is, you must select calls and set parameter values that reflect the variability of the target calls and also reflect the relative costs of FP and FN errors.
 
 
-## H: Seven Stages to Building a DIY Call Recognizer
+## G: Seven Stages to Building a DIY Call Recognizer
 
 **Stage 1:** Select several one-minute recordings that contain typical examples of your target call. It is also desirable that the background acoustic events in you chosen recordings are representative of the intended operational environment. If this is difficult, one trick to try is to play examples of your target call through a loud speaker in a location that is similar to your intended operational enviornment. You can then record the calls using your intended Acoustic Recording Unit (ARU).
 
@@ -304,7 +306,7 @@ It is also useful at this stage to accumulate a set of recordings that do *not* 
 **Stage 8:** At some point you are ready to use your recognizer on recordings obtained from the operational environment.
 
 
-## I: The DIY Call Recognizer command line
+## H: The DIY Call Recognizer command line
 AnalysisPrograms.exe action arguments options
 
 ```powershell
