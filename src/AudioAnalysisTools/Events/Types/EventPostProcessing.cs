@@ -210,7 +210,7 @@ namespace AudioAnalysisTools.Events.Types
         /// </summary>
         public class SyllableSequenceConfig
         {
-            // ################ The first three properties concern the combining of syllables into a sequence or stroph.
+            // ################ The first three properties concern the combining of syllables into a sequence or strophe.
 
             /// <summary>
             /// Gets or sets a value indicating Whether or not to combine events that constitute a sequence of the same strophe.

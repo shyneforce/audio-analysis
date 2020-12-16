@@ -58,6 +58,11 @@ namespace AnalysisPrograms.Recognizers
             // validation of configs can be done here
             ValidateProfileTagsMatchAlgorithms(result.Profiles, file);
 
+            if (result.PostProcessing is null)
+            {
+                Log.Warn($"The `{nameof(result.PostProcessing)}` section of the config appears to be empty");
+            }
+
             return result;
         }
 
@@ -144,11 +149,15 @@ namespace AnalysisPrograms.Recognizers
 
             // ############################### POST-PROCESSING OF GENERIC EVENTS ###############################
             var postprocessingConfig = configuration.PostProcessing;
-            results.NewEvents = EventPostProcessing.PostProcessingOfSpectralEvents(
-                results.NewEvents,
-                postprocessingConfig,
-                results.Sonogram,
-                segmentStartOffset);
+            if (postprocessingConfig is not null)
+            {
+                results.NewEvents = EventPostProcessing.PostProcessingOfSpectralEvents(
+                    results.NewEvents,
+                    postprocessingConfig,
+                    results.Sonogram,
+                    segmentStartOffset);
+            }
+
             return results;
         }
 
@@ -220,7 +229,8 @@ namespace AnalysisPrograms.Recognizers
                         NoiseReductionParameter = ac.NoiseReductionParameter,
                     };
 
-                    speciesName = "aed";
+                    // try to give the events are more useful name by dyanmically fetching aa value from the yaml config
+                    speciesName = configuration.GetStringOrNull("SpeciesName") ?? "aed";
                     var spectrogram = new SpectrogramStandard(config, audioRecording.WavReader);
 
                     // GET THIS TO RETURN BLOB EVENTS.
