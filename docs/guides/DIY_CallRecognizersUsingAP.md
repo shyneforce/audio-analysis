@@ -2,7 +2,7 @@
 # Welcome to "DIY Call Recognizer"
 
          
-**DIY Call Recognizer** is a utility within **Analysis Programs**, a command line program that analyses long-duration audio-recordings of the enviornment. `AnalysisPrograms.exe` (abbreviated from here to `APexe`) contains many sub-programs, one of which provides you with the ability to write your own call recognizers. This manual describes how to write a **DIY call recognizer**. Refer to other manuals for other functionality.
+> **DIY Call Recognizer** is a utility within **Analysis Programs**, a command line program that analyses long-duration audio-recordings of the enviornment. `AnalysisPrograms.exe` (abbreviated from here to `APexe`) contains many sub-programs or functions, one of which is the ability to write your own call recognizers. This manual describes how to write a **DIY call recognizer**. Refer to other manuals for other functionality [here](https://github.com/QutEcoacoustics/audio-analysis/blob/master/README.md).
 
 ## Contents ##
 1. Why bother with a DIY call recognizer?
@@ -16,7 +16,9 @@
 
 ==============================================================
 
-.
+NOTE:
+- Incomplete parts of the manual are indicated by _**TODO**_.
+- Features not yet implemented are marked with a construction emoji (🚧).
   
 .
 
@@ -87,7 +89,7 @@ The algorithmic approach of **DIY Call Recognizer** makes particular assumptions
 An *acoustic event* is defined as a contiguous set of spectrogram cells/pixels whose decibel values exceed some user defined threshold. In the ideal case, an acoustic event should encompass a discrete component of acoustic energy within a call, syllable or harmonic. It will be separated from other acoustic events by intervening pixels having decibel values *below* the user defined threshold. **DIY Call Recognizer** contains algorithms to recognize seven different kinds of acoustic event based on their shape in the spectrogram. We describe these in turn.
 
 ### 3.1. Shreik 
-This is a diffuse acoustic event that is extended in both time and frequency. While a shriek may have internal structure, it is treated as a "blob" of acoustic energy. A typical example is a parrot shriek.
+This is a diffuse acoustic event that is extended in both time and frequency. While a shriek may have some internal structure, it is treated by **DIY Call Recognizer** as a "blob" of acoustic energy. A typical example is a parrot shriek.
 
 ### 3.2. Whistle
 This is a narrow band, "pure" tone having duration over several to many time frames but having very restricted bandwidth. In theory a pure tone occupies a single frequency bin, but in practice bird whistles can occupy several freqeuncy bins and appear as a horizontal *spectral track* in the spectrogram.
@@ -117,11 +119,19 @@ Harmonics are the same/similar shaped *whistle* or *chirp* repeated simultaneous
 
 
 ## 4. Configuration files
-In order to find calls of interest in a recording, you must *configure* **DIY Call Recognizer**, that is, edit a *configuration file* to describe what kinds of acoustic events (syllables and harmonics) make up your target calls.   
+In order to find calls of interest in a recording, you must *configure* **DIY Call Recognizer**, that is, you edit a *configuration file* to describe the acoustic events (syllables) that are part of your target calls. The configuration files are written in a language called YAML. For an introduction to YAML please see this article: https://sweetohm.net/article/introduction-yaml.en.html.
 
-@SOMEthiNG MORE ON CONFIGURATION FILES IS reQUIreD HErE.
+We highly recommend using `Notepad++` or `Visual Studio Code` to edit your YAML config files. Both are free and both come with built in syntax highlighting for YAML files.
 
-Given an acoustic recording, there are six steps to detecting calls using DIY Call Recognizer: 
+The name of the configuration file is passed as a command-line argument to `APexe`. The command line will be explained in a subsequent section. In this section we are concerned only with the contents of the configuration (_config_) file. We use, as a concrete example, the config file for the Boobook Owl, *Ninox boobook*.
+
+Note that the config filename must have the correct structure in order to be recognized by `APexe`. In this case. the config file name is `Ecosounds.NinoxBoobook.yml`. There are three components to the name:
+- `Ecosounds` informs `APexe` that this is a call recognition task. 
+- `NinoxBoobook` is the scientific name of the target species. (Note there must be no spaces in the file name.) 
+- `.yml` is an extention which informs `APexe` about the file syntax.
+
+
+### There are six steps to detecting calls using **DIY Call Recognizer**: 
 1. Recording segmentation
 2. Spectrogram preparation
 3. Call syllable detection
@@ -129,10 +139,7 @@ Given an acoustic recording, there are six steps to detecting calls using DIY Ca
 5. Call filtering
 6. Saving Results
 
-To execute these steps correctly for your target call, you must enter suitable parameter values into a *config.yml* file. The name of this file is passed as an argument to `APexe` which reads the file and executes the recognition steps. The command line will be explained in a subsequent section. This section describes how to set the parameters for each of the six recognition steps. We usie, as a concrete example, the config file for the Boobook Owl, *Ninox boobook*.
-Note that the config filename must have the correct structure in order to be recognized by `APexe`, in this case `Ecosounds.NinoxBoobook.yml`. `Ecosounds` indicates the software required to read the yml file and `NinoxBoobook` is the scientific name of the target species. (Note there must no spaces in the file name.) 
-
-The parameters are described below. The parameter name is given in bold followed by a typical or default value for the parameter. A description of the parameter is given on the following line(s).
+To execute these steps correctly for your target call, you must enter suitable parameter values into the *config* file. This rest of this section describes how to set the parameters for each of the six recognition steps. Each parameter is given by `name:value` pair. In the below examples, a typical or default value is used. A description follows each group of parameters.
 
 ### Step 1. Recording Segmentation
 There are two parameters that determine how a long recording is segmented:   
@@ -140,7 +147,7 @@ There are two parameters that determine how a long recording is segmented:
 SegmentDuration: 60    
 SegmentOverlap: 0
 ```    
-The default values are 60 and 0 seconds respectively and these seldom need to be changed. You may wish to work at finer resolution by changing SegmentDuration to 20 or 30 seconds. If your target call is comparitively long (e.g. greater than 10 - 15 seconds), you could increase SegmentDuration to 70 seconds and increase SegmentOverlap to 10 seconds. This reduces the probability that a call will be split across segments. It also maintains 60-second intervals between segment-starts which helps in identifying where you are in a recording.
+> The default values are 60 and 0 seconds respectively and these seldom need to be changed. You may wish to work at finer resolution by changing SegmentDuration to 20 or 30 seconds. If your target call is comparitively long (e.g. greater than 10 - 15 seconds), you could increase SegmentDuration to 70 seconds and increase SegmentOverlap to 10 seconds. This reduces the probability that a call will be split across segments. It also maintains 60-second intervals between segment-starts which helps in identifying where you are in a recording.
 
 ### Step 2. Spectrogram preparation
 There are four parameters that determine how a spectrogram is derived from each recording segment.
@@ -152,13 +159,13 @@ WindowFunction: HANNING
 BgNoiseThreshold: 0  
 ``` 
 
-**ResampleRate** must be twice the desired Nyquist. If your config file does not specify a value for ResampleRate, your recording will be up- or down-sampled to the default value of 22050 samples per second. As a rule of thumb, specify the resample rate that will give the best result given your recording sample rate. If the target call of interest is in a low frequency band (e.g. < 2kHz), then lower the resample rate to twice the maximum frequency of interest. This will reduce processing time and produce better focused spectrograms.
+> *ResampleRate* must be twice the desired Nyquist. If your config file does not specify a value for ResampleRate, your recording will be up- or down-sampled to the default value of 22050 samples per second. As a rule of thumb, specify the resample rate that will give the best result given your recording sample rate. If the target call of interest is in a low frequency band (e.g. < 2kHz), then lower the resample rate to twice the maximum frequency of interest. This will reduce processing time and produce better focused spectrograms.
 
-**FrameSize** and **FrameStep** determine the time and frequency resolution of the spectrogram. Typical values are 512 and 0 samples respectively. There is a trade-off between time resolution and frequency resolution; finding the best compromise is really a matter of trial and error. If your target call is of long duration with little temporal variation (e.g. a whistle) then **FrameSize** can be increased to 1024 or even 2048. (NOTE: The value of **FrameSize** must be a power of 2.) To capture more temporal variation in your target calls, decrease **FrameSize** and/or decrease **FrameStep**. A typical **FrameStep** might be half the **FrameSize** but does not need to be a power of 2.
+> *FrameSize* and *FrameStep* determine the time and frequency resolution of the spectrogram. Typical values are 512 and 0 samples respectively. There is a trade-off between time resolution and frequency resolution; finding the best compromise is really a matter of trial and error. If your target call is of long duration with little temporal variation (e.g. a whistle) then *FrameSize* can be increased to 1024 or even 2048. (NOTE: The value of *FrameSize* must be a power of 2.) To capture more temporal variation in your target calls, decrease *FrameSize* and/or decrease *FrameStep*. A typical *FrameStep* might be half the *FrameSize* but does not need to be a power of 2.
 
-The default value for **WindowFunction** is HANNING. There should no need to ever change this but you might like to try a HAMMING window if you are not satisfied with the appearance of your spectrograms.
+> The default value for *WindowFunction* is `HANNING`. There should no need to ever change this but you might like to try a `HAMMING` window if you are not satisfied with the appearance of your spectrograms.
 
-**BgNoiseThreshold** "Bg" means *background*. This parameter determines the degree of severity of noise removal fomr the spectrogram. The units are decibels. 
+*BgNoiseThreshold* "Bg" means *background*. This parameter determines the degree of severity of noise removal fomr the spectrogram. The units are decibels. 
 
 
 ![Templates have parameters](./Images/TemplatesHaveParameters.png)
