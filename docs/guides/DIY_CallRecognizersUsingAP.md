@@ -18,8 +18,8 @@
 
 NOTE:
 - Incomplete parts of the manual are indicated by _**TODO**_.
-- Features not yet implemented are marked with a construction emoji (🚧).
-  
+- Features not yet implemented are marked with a construction emoji (🚧). 
+
 .
 
 
@@ -119,63 +119,80 @@ Harmonics are the same/similar shaped *whistle* or *chirp* repeated simultaneous
 
 
 ## 4. Configuration files
-In order to find calls of interest in a recording, you must *configure* **DIY Call Recognizer**, that is, you edit a *configuration file* to describe the acoustic events (syllables) that are part of your target calls. The configuration files are written in a language called YAML. For an introduction to YAML please see this article: https://sweetohm.net/article/introduction-yaml.en.html.
+**DIY Call Recognizer** is a command line tool. In order to find calls of interest in a recording, you must *configure* the recognizer, that is, edit a _configuration file_ to describe what kinds of acoustic events/syllables make up your target calls. The configuration files must be written in a language called YAML syntax. For an introduction to YAML please see this article: https://sweetohm.net/article/introduction-yaml.en.html.
 
-We highly recommend using `Notepad++` or `Visual Studio Code` to edit your YAML config files. Both are free and both come with built in syntax highlighting for YAML files.
+We highly recommend using Notepad++ or Visual Studio Code to edit your YAML config files. Both are free, and both come with built in syntax highlighting for YAML files.
 
-The name of the configuration file is passed as a command-line argument to `APexe`. The command line will be explained in a subsequent section. In this section we are concerned only with the contents of the configuration (_config_) file. We use, as a concrete example, the config file for the Boobook Owl, *Ninox boobook*.
+There are seven steps to detecting/recognizing calls using **DIY Call Recognizer**: 
+1. Recording resampling
+2. Recording segmentation
+3. Spectrogram preparation
+4. Call syllable detection
+5. Combining syllable events into calls
+6. Call filtering
+7. Saving Results
 
-Note that the config filename must have the correct structure in order to be recognized by `APexe`. In this case. the config file name is `Ecosounds.NinoxBoobook.yml`. There are three components to the name:
-- `Ecosounds` informs `APexe` that this is a call recognition task. 
-- `NinoxBoobook` is the scientific name of the target species. (Note there must be no spaces in the file name.) 
-- `.yml` is an extention which informs `APexe` about the file syntax.
+To execute these steps correctly, you must enter suitable parameter values for your target call into a *config.yml* file. The name of this file is passed as an argument in the `APexe` command line. `APexe` reads the file and executes the recognition steps. The command line will be explained in a subsequent section. This section describes how to set the parameters (using the correct yaml syntax) for each of the seven recognition steps. We use, as a concrete example, the config file for the Boobook Owl, *Ninox boobook*.
+Note that the config filename must have the correct structure in order to be recognized by `APexe`, in this case `Ecosounds.NinoxBoobook.yml`.
+- `Ecosounds` tells `APexe` that this is a call recognition task.
+- `NinoxBoobook` tells `APexe` the scientific name of the target species. (Note there must no spaces in the file name.)
+- `.yml` informs `APexe` what syntax to expect.
 
+The parameters are described below as `name:value` pairs. Each name is followed by a `colon` which is followed by a typical or default value for the parameter. The `YAML` lines are followed by an explanation of the parameters.
 
-### There are six steps to detecting calls using **DIY Call Recognizer**: 
-1. Recording segmentation
-2. Spectrogram preparation
-3. Call syllable detection
-4. Combining syllables into calls
-5. Call filtering
-6. Saving Results
+### Step 1. Recording resampling
+If this parameter is not specified in the config file, the default is to resample (up- or down-sample) the recording to 22050 samples per second. This has the effect of limiting the maximum frequency in the recording to 11025 Hertz.   
+```yml
+ResampleRate: 22050
+```
+> *ResampleRate* must be to twice the desired Nyquist. As a rule of thumb, specify the resample rate that will give the best result for your target call. If the target call is in a low frequency band (e.g. < 2kHz), then lower the resample rate to twice the maximum frequency of interest. This will reduce processing time and produce better focused spectrograms. If you down-sample, you will lose high frequency content. If you up-sample, there will be undefined "noise" in spectrograms above the Nyquist.
 
-To execute these steps correctly for your target call, you must enter suitable parameter values into the *config* file. This rest of this section describes how to set the parameters for each of the six recognition steps. Each parameter is given by `name:value` pair. In the below examples, a typical or default value is used. A description follows each group of parameters.
-
-### Step 1. Recording Segmentation
-There are two parameters that determine how a long recording is segmented:   
+### Step 2. Recording segmentation
+Analysis of long recordings is made tractable by breaking them into shorter (typically 60-second) segments.
 ```yml
 SegmentDuration: 60    
 SegmentOverlap: 0
 ```    
-> The default values are 60 and 0 seconds respectively and these seldom need to be changed. You may wish to work at finer resolution by changing SegmentDuration to 20 or 30 seconds. If your target call is comparitively long (e.g. greater than 10 - 15 seconds), you could increase SegmentDuration to 70 seconds and increase SegmentOverlap to 10 seconds. This reduces the probability that a call will be split across segments. It also maintains 60-second intervals between segment-starts which helps in identifying where you are in a recording.
+> The default values are 60 and 0 seconds respectively and these seldom need to be changed. You may wish to work at finer resolution by changing SegmentDuration to 20 or 30 seconds. If your target call is comparitively long (such as a koala bellow, e.g. greater than 10 - 15 seconds), you could increase SegmentDuration to 70 seconds and increase SegmentOverlap to 10 seconds. This reduces the probability that a call will be split across segments. It also maintains a 60-second interval between segment-starts which helps to identify where you are in a recording.
 
-### Step 2. Spectrogram preparation
+### Profiles
+Before moving to Step 3, we must introduce the concept of a _profile_. The layout of a _config.yml_ file is in three parts: 
+1. Parameters that determine pre-processing of the recording. The three parameters described in Steps 1 and 2 above are preprocessing parameters, that is, they determine steps prior to the search for acoustic events.
+2. Parameters grouped into _profiles_. Each profile defines an acoustic event.
+3. Parameters that determine post-processing of the retrieved acoustic events.
+
+All acoustic events are characterised by distinct properties, such as their temporal duration, bandwidth, decibel intensity. In fact, every acoustic event is bounded by an _implicit_ rectangle or marquee whose height represents the bandwidth of the event and whose width represents the duration of the event. Even a chirp or whip which consists only of a single sloping *spectral track*, is enclosed by a rectangle, two of whose vertices sit at the start and end of the track.
+
+Each property of an acoustic event is described by a parameter or a `name:value` pair. A collection of parameter `name:value` pairs is referred to as a `Profile`. The `config.yml` file may contain any number of profiles describing the various syllables that make up the call. You can set up more than one profile for a syllable. Each profile is processed separately. The user ascribes a name and type to each profile. So we have a three level hierarchy:
+1. the `profile list`
+2. the `profile`
+3. the `profile parameters`. 
+
+> *IMPORTANT NOTE: In YAML syntax, the levels of a hierarchy are distinguished by indentation alone. It is most important that the indentation is retained or the config file will not be read correctly. 
+
+> **_TODO_** a description of PROFILES. 
+
+### Step 3. Spectrogram preparation
 There are four parameters that determine how a spectrogram is derived from each recording segment.
-```yml
-ResampleRate: 22050    
+```yml    
 FrameSize: 1024    
 FrameStep: 256    
 WindowFunction: HANNING   
 BgNoiseThreshold: 0  
 ``` 
 
-> *ResampleRate* must be twice the desired Nyquist. If your config file does not specify a value for ResampleRate, your recording will be up- or down-sampled to the default value of 22050 samples per second. As a rule of thumb, specify the resample rate that will give the best result given your recording sample rate. If the target call of interest is in a low frequency band (e.g. < 2kHz), then lower the resample rate to twice the maximum frequency of interest. This will reduce processing time and produce better focused spectrograms.
-
-> *FrameSize* and *FrameStep* determine the time and frequency resolution of the spectrogram. Typical values are 512 and 0 samples respectively. There is a trade-off between time resolution and frequency resolution; finding the best compromise is really a matter of trial and error. If your target call is of long duration with little temporal variation (e.g. a whistle) then *FrameSize* can be increased to 1024 or even 2048. (NOTE: The value of *FrameSize* must be a power of 2.) To capture more temporal variation in your target calls, decrease *FrameSize* and/or decrease *FrameStep*. A typical *FrameStep* might be half the *FrameSize* but does not need to be a power of 2.
+> *FrameSize* and *FrameStep* determine the time/frequency resolution of the spectrogram. Typical values are 512 and 0 samples respectively. There is a trade-off between time resolution and frequency resolution; finding the best compromise is really a matter of trial and error. If your target call is of long duration with little temporal variation (e.g. a whistle) then *FrameSize* can be increased to 1024 or even 2048. (NOTE: The value of *FrameSize* must be a power of 2.) To capture more temporal variation in your target calls, decrease *FrameSize* and/or decrease *FrameStep*. A typical *FrameStep* might be half the *FrameSize* but does not need to be a power of 2.
 
 > The default value for *WindowFunction* is `HANNING`. There should no need to ever change this but you might like to try a `HAMMING` window if you are not satisfied with the appearance of your spectrograms.
 
-*BgNoiseThreshold* "Bg" means *background*. This parameter determines the degree of severity of noise removal fomr the spectrogram. The units are decibels. 
+> *BgNoiseThreshold* "Bg" means *background*. This parameter determines the degree of severity of noise removal from the spectrogram. The units are decibels. Zero is the safest default value and probably does not need to be changed. Increasing the value to say 3-4 decibels increases the likelihood that you will lose some important compoents of you target calls. For more on the noise removal algorithm used by `APexe` see [Towsey, Michael W. (2013) Noise removal from wave-forms and spectrograms derived from natural recordings of the environment.](https://eprints.qut.edu.au/61399/). 
 
 
 ![Templates have parameters](./Images/TemplatesHaveParameters.png)
 
-### Step 3. Call syllable detection
-All the above seven types of acoustic event are characterised by distinct properties such as their temporal duration, bandwidth, intensity. In fact, every acoustic event is bounded by a rectangle or marquee whose height represents the bandwidth of the event and whose width represents the duration of the event. Even a chirp or whip which consists only of a single *spectral track*, is enclosed by a rectangle, two of whose vertices sit at the start and end of the track. Each of these profiles will be analyzed.
+### Step 4. Call syllable detection
 
-*IMPORTANT NOTE: The indentation in these config.yml files is very important and should be retained. 
-
- This profile is required for the species-specific recogniser and must have the current name.
+Here is the declaration of the `Profiles` section in the `Ecosounds.NinoxBoobook.yml` file. It contains just one profile. The profile is named `BoobookSyllable` and is declared as type `ForwardTrackParameters` (a chirp). The `!` is shorthand for "of type". Indented below the profile declaration are seven properties (`name:value` pairs).
 ```yml
 Profiles:  
     BoobookSyllable: !ForwardTrackParameters
@@ -196,17 +213,21 @@ Profiles:
             - 12.0
 ```
 
-### Step 4. Combining syllables into calls
+> **_TODO_** a description of the above parrameters. 
+
+### Step 5. Combining syllables into calls
 This step is the first of three *post-processing* steps.
-IMPORTANT NOTE: These post-processing steps are applied to the calls collected from all *profiles*. 
+IMPORTANT NOTE: These post-processing steps are applied to the calls collected from all *profiles* in the list of profiles. 
 
-**Step 4.1.** Combine overlapping events. This is typically set *true*, but it depends on the target call. You may wish to set this true to remove certain kinds of multi-syllable calls.
+**Step 5.1.** Combine overlapping events. This is typically set *true*, but it depends on the target call. You may wish to set this true to remove certain kinds of multi-syllable calls.
  ```yml
-CombineOverlappingEvents: true
+PostProcessing:
+    CombineOverlappingEvents: true
 ```
+> **_TODO_** a description of the above parrameter. 
 
-**Step 4.2.** Combine possible syllable sequences
-Combine possible syllable sequences and filter on excess syllable count.
+**Step 5.2.** Combine possible syllable sequences
+Combine possible syllable sequences and filter on excess syllable count. Note the indentation.
 ```yml
     SyllableSequence:
         CombinePossibleSyllableSequence: true
@@ -217,24 +238,28 @@ Combine possible syllable sequences and filter on excess syllable count.
         ExpectedPeriod: 0.4
 ```	
 
-### Step 5. Call filtering
-**Step 5.1.** Remove events whose duration lies outside 3 SDs of an expected value.
+> **_TODO_** a description of the above parrameters. 
+
+### Step 6. Call filtering
+**Step 6.1.** Remove events whose duration lies outside 3 SDs of an expected value.
 
 ```yml
     Duration:
         ExpectedDuration: 0.14
         DurationStandardDeviation: 0.01
 ```
+> **_TODO_** a description of the above parrameters. 
 
-**Step 5.2.** Remove events whose bandwidth is too small or large.
+**Step 6.2.** Remove events whose bandwidth is too small or large.
         Remove events whose bandwidth lies outside 3 SDs of an expected value.
 ```yml
     Bandwidth:
         ExpectedBandwidth: 280
         BandwidthStandardDeviation: 40
 ```
+> **_TODO_** a description of the above parrameters. 
 
-**Step 5.3.** Filter the events for excess activity in their sidebands, i.e. upper and lower buffer zones
+**Step 6.3.** Filter the events for excess activity in their sidebands, i.e. upper and lower buffer zones
 	    Remove events that have excessive noise in their side-bands.
 ```yml
     SidebandActivity:
@@ -242,8 +267,9 @@ Combine possible syllable sequences and filter on excess syllable count.
         UpperHertzBuffer: 400
         MaxAverageSidebandDecibels: 3.0
 ```
+> **_TODO_** a description of the above parrameters. 
 
-### Step 6. Saving Results
+### Step 7. Saving Results
 In this final part of the config file, you set parameters that determine what results are saved to file.
 
 - There are three options for saving spectrograms (case-sensitive): [False/Never | True/Always | WhenEventsDetected]
