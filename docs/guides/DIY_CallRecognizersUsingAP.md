@@ -20,6 +20,9 @@ NOTE:
 - Incomplete parts of the manual are indicated by _**TODO**_.
 - Features not yet implemented are marked with a construction emoji (🚧). 
 
+==============================================================
+
+
 .
 
 
@@ -132,13 +135,35 @@ There are seven steps to detecting/recognizing calls using **DIY Call Recognizer
 6. Call filtering
 7. Saving Results
 
-To execute these steps correctly, you must enter suitable parameter values for your target call into a *config.yml* file. The name of this file is passed as an argument in the `APexe` command line. `APexe` reads the file and executes the recognition steps. The command line will be explained in a subsequent section. This section describes how to set the parameters (using the correct yaml syntax) for each of the seven recognition steps. We use, as a concrete example, the config file for the Boobook Owl, *Ninox boobook*.
-Note that the config filename must have the correct structure in order to be recognized by `APexe`, in this case `Ecosounds.NinoxBoobook.yml`.
-- `Ecosounds` tells `APexe` that this is a call recognition task.
-- `NinoxBoobook` tells `APexe` the scientific name of the target species. (Note there must no spaces in the file name.)
-- `.yml` informs `APexe` what syntax to expect.
+To execute these steps correctly for your target call, you must enter suitable parameter values into a *config.yml* file. The name of this file is passed as an argument on the `APexe` command line. `APexe` reads the file and executes the recognition steps. The command line will be explained in a subsequent section. This section describes how to set the parameters (using correct yaml syntax) for each of the seven recognition steps. We use, as a concrete example, the config file for the Boobook Owl, *Ninox boobook*.
 
-The parameters are described below as `name:value` pairs. Each name is followed by a `colon` which is followed by a typical or default value for the parameter. The `YAML` lines are followed by an explanation of the parameters.
+> NOTE: The config filename must have the correct structure in order to be recognized by `APexe`, in this case `Ecosounds.NinoxBoobook.yml`.
+> - `Ecosounds` tells `APexe` that this is a call recognition task.
+> - `NinoxBoobook` tells `APexe` the scientific name of the target species. (Note there must no spaces in the file name.)
+> - `.yml` informs `APexe` what syntax to expect.
+
+Each parameter consists of a `name:value` pair. The name is followed by a `colon` which is followed by a typical or default value for the parameter. 
+
+### Profiles
+> **_TODO_** need to work on this description of PROFILES. 
+
+The layout of a _config.yml_ file is in three parts: 
+1. Parameters that determine pre-processing of the recording. The three parameters described in Steps 1 and 2 above are preprocessing parameters, that is, they determine steps prior to the search for acoustic events.
+2. Parameters grouped into _profiles_. Each profile defines an acoustic event.
+3. Parameters that determine post-processing of the retrieved acoustic events.
+
+All acoustic events are characterised by distinct properties, such as their temporal duration, bandwidth, decibel intensity. In fact, every acoustic event is bounded by an _implicit_ rectangle or marquee whose height represents the bandwidth of the event and whose width represents the duration of the event. Even a chirp or whip which consists only of a single sloping *spectral track*, is enclosed by a rectangle, two of whose vertices sit at the start and end of the track.
+
+Each property of an acoustic event is described by a parameter or a `name:value` pair. A collection of parameter `name:value` pairs is referred to as a `Profile`. The `config.yml` file may contain any number of profiles describing the various syllables that make up the call. You can set up more than one profile for a syllable. Each profile is processed separately. The user ascribes a name and type to each profile. So we have a three level hierarchy:
+1. the `profile list`
+2. the `profile`
+3. the `profile parameters`. 
+
+> *IMPORTANT NOTE: In YAML syntax, the levels of a hierarchy are distinguished by indentation alone. It is most important that the indentation is retained or the config file will not be read correctly. 
+
+
+
+The `YAML` lines are followed by an explanation of the parameters.
 
 ### Step 1. Recording resampling
 If this parameter is not specified in the config file, the default is to resample (up- or down-sample) the recording to 22050 samples per second. This has the effect of limiting the maximum frequency in the recording to 11025 Hertz.   
@@ -154,23 +179,6 @@ SegmentDuration: 60
 SegmentOverlap: 0
 ```    
 > The default values are 60 and 0 seconds respectively and these seldom need to be changed. You may wish to work at finer resolution by changing SegmentDuration to 20 or 30 seconds. If your target call is comparitively long (such as a koala bellow, e.g. greater than 10 - 15 seconds), you could increase SegmentDuration to 70 seconds and increase SegmentOverlap to 10 seconds. This reduces the probability that a call will be split across segments. It also maintains a 60-second interval between segment-starts which helps to identify where you are in a recording.
-
-### Profiles
-Before moving to Step 3, we must introduce the concept of a _profile_. The layout of a _config.yml_ file is in three parts: 
-1. Parameters that determine pre-processing of the recording. The three parameters described in Steps 1 and 2 above are preprocessing parameters, that is, they determine steps prior to the search for acoustic events.
-2. Parameters grouped into _profiles_. Each profile defines an acoustic event.
-3. Parameters that determine post-processing of the retrieved acoustic events.
-
-All acoustic events are characterised by distinct properties, such as their temporal duration, bandwidth, decibel intensity. In fact, every acoustic event is bounded by an _implicit_ rectangle or marquee whose height represents the bandwidth of the event and whose width represents the duration of the event. Even a chirp or whip which consists only of a single sloping *spectral track*, is enclosed by a rectangle, two of whose vertices sit at the start and end of the track.
-
-Each property of an acoustic event is described by a parameter or a `name:value` pair. A collection of parameter `name:value` pairs is referred to as a `Profile`. The `config.yml` file may contain any number of profiles describing the various syllables that make up the call. You can set up more than one profile for a syllable. Each profile is processed separately. The user ascribes a name and type to each profile. So we have a three level hierarchy:
-1. the `profile list`
-2. the `profile`
-3. the `profile parameters`. 
-
-> *IMPORTANT NOTE: In YAML syntax, the levels of a hierarchy are distinguished by indentation alone. It is most important that the indentation is retained or the config file will not be read correctly. 
-
-> **_TODO_** a description of PROFILES. 
 
 ### Step 3. Spectrogram preparation
 There are four parameters that determine how a spectrogram is derived from each recording segment.
