@@ -10,7 +10,7 @@
 3. Acoustic events
 4. Detecting acoustic events
 5. Configuration files
-6. The list of parameters
+6. Parameter names and values
 7. An efficient strategy to tune parameters
 8. Seven stages to building a DIY call recognizer
 9. The command line
@@ -218,7 +218,7 @@ In this artificial example, three profiles (i.e. syllables or acoustic events) a
 
 .
 
-## 6. The list of parameters
+## 6. Parameter names and values
 
 This section describes how to set the parameters (using correct yaml syntax) for each of the seven recognition steps. We use, as a concrete example, the config file for the Boobook Owl, *Ninox boobook*.
 
@@ -457,54 +457,40 @@ We described above the various steps required to tune the parameter values in a 
 
 
 ## 9. The DIY Call Recognizer command line
-AnalysisPrograms.exe action arguments options
+`APexe` performs several functions or actions, each one requiring a different command line. In its most general form, the command line takes the form:
 
+>`AnalysisPrograms.exe action arguments options` 
+
+In this section we only describe the command line for the _call recognizer_ action where:
+- action = "audio2csv".
+- arguments = the paths to an audio file, a config file and an output directory. 
+- options = short strings beginning with a `-` or `--` that influence `APexe`'s execution.
+
+Refer to other manuals [here](https://github.com/QutEcoacoustics/audio-analysis/blob/master/README.md) for a more complete description of `APexe`'s functionality. Note that the three file arguments must be in the order shown, that is: audio file, config file, output directory.
+
+**Options:** There are two frequently useful options: 
+
+    1. The debug/no-debug options: Use -d for debug or -n for no debugging.
+    2. The verbosity options: --quiet, -v, -vv, -vvv for different levels of verbosity.
+    
+For other possible options, see the above referenced manual.
+
+In powershell, the code to prepare and execute a commandline might look like this:
 ```powershell
+    ...
     # prepare the arguments
-    $file = ""
-    $configFile = ""
-    $outputDirectory = ""
+    $audioFile = "path to the audio file"
+    $configFile = "path to the config file"
+    $outputDirectory = "path to the output directory"
 
     # prepare command line
-    $command = " .\AnalysisPrograms.exe audio2csv $file $configFile 
+    $command = " .\AnalysisPrograms.exe audio2csv $audioFile $configFile 
                         $outputDirectory -n --quiet"
 
     # EXECUTE the command
     Invoke-Expression $command
 ```
-
-### Actions:
-- list - Prints the available program actions. No arguments required.
-
-- help - Prints the full help for the program and all actions
-    
-    EXAMPLE: `help spt` will print help for the `spt` action
-
-    -a  -actionname  [string]  1
-    	#$command = ".\AnalysisPrograms.exe -h"
-		#$command = " .\AnalysisPrograms.exe audio2csv --help"
-		#Use these command lines to get help with constructing the command line.
-		#$command = " `"$analysisProgramsDirectory\AnalysisPrograms.exe`" `"audio2csv`" --help"
-
-### Global options:
-
-    -d    -debug      [switch]      * Do not show the debug prompt AND automatically attach a debugger. Has no effect in RELEASE builds
-    -n    -nodebug    [switch]      * Do not show the debug prompt or attach a debugger. Has no effect in RELEASE builds
-    -l    -loglevel   [logverbosity] * Set the logging.
-                Valid values:   None = 0,
-                                Error = 1,
-                                Warn = 2,
-                                Info = 3,
-                                Debug = 4,
-                                Trace = 5,
-                                Verbose = 6,
-                                All = 7
-    -v    -verbose    [switch]  * Set the logging to be verbose.
-                                Equivalent to LogLevel = Debug = 4
-    -vv   -vverbose   [switch]  * Set the logging to very verbose.                                      Equivalent to LogLevel = Trace = 4
-    -vvv  -vvverbose  [switch]  * Set the logging to very very verbose.
-                                Equivalent to LogLevel = ALL = 7
-
+In the above command line, the options are no-debugging and minimal logging.
 
 .
 
@@ -514,14 +500,15 @@ AnalysisPrograms.exe action arguments options
 
 ## 10. Building a larger data set
 
-As indicated in Section 6, (*Eight steps to building a DIY Call Recognizer*), Step 7, it is useful to accumulate a set of recordings that both contain and *do not* contain the target call. The *negative* examples should contain acoustic events that have previously been detected as FPs. You now have two sets of recordings, one set containing the target call and one set containing previous FPs. The idea is to tune parameter values, while carefully watching for what effect the changes have on both data sets. Eventually, this data set could be used for machine learning purposes where you are not happy with the performance of the template recognizer.  
+As indicated at Step 7 in Section 8 (*Eight steps to building a DIY Call Recognizer*), it is useful to accumulate a set of recordings, some of which contain the target call and some of which *do not*. The *negative* examples should include acoustic events that have previously been detected as FPs. You now have two sets of recordings, one set containing the target call(s) and one set containing previous FPs and other possible confusing acoustic events. The idea is to tune parameter values, while carefully watching for what effect the changes have on both data sets. Eventually, these two labelled data sets can be used for machine learning purposes.
+
+In order to facilitate the determination of recognizer performance on labelled datasets, `APexe` can be run from the `Egret` software. `Egret` can greatly speed up the preparation of labelled datasets and can greatly improve the performance of a recognizer by more careful selection of positive and negative examples. `Egret` is available from  [https://github.com/QutEcoacoustics/egret](https://github.com/QutEcoacoustics/egret).  
+
 
 ==================================================================
 
 
 ADDITIONAL NOTES:
-
-[title](https://www.example.com)
 
 ![alt text](image.jpg)
 
