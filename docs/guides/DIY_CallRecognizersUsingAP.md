@@ -8,11 +8,13 @@
 1. Why bother with a DIY call recognizer?
 2. Calls, syllables, harmonics
 3. Acoustic events
-4. Configuration files
-5. An efficient strategy to tune parameters
-6. Seven stages to building a DIY call recognizer
-7. The command line
-8. Building a larger data set
+4. Detecting acoustic events
+5. Configuration files
+6. The list of parameters
+7. An efficient strategy to tune parameters
+8. Seven stages to building a DIY call recognizer
+9. The command line
+10. Building a larger data set
 
 ==============================================================
 
@@ -120,48 +122,103 @@ Harmonics are the same/similar shaped *whistle* or *chirp* repeated simultaneous
 
 .
 
-
-## 4. Configuration files
-**DIY Call Recognizer** is a command line tool. In order to find calls of interest in a recording, you must *configure* the recognizer, that is, edit a _configuration file_ to describe what kinds of acoustic events/syllables make up your target calls. The configuration files must be written in a language called YAML syntax. For an introduction to YAML please see this article: https://sweetohm.net/article/introduction-yaml.en.html.
-
-We highly recommend using Notepad++ or Visual Studio Code to edit your YAML config files. Both are free, and both come with built in syntax highlighting for YAML files.
-
-There are seven steps to detecting/recognizing calls using **DIY Call Recognizer**: 
-1. Recording resampling
-2. Recording segmentation
+## 4. Detecting acoustic events
+**DIY Call Recognizer** detects or recognizes target calls in an audio recording using seven steps: 
+1. Audio resampling
+2. Audio segmentation
 3. Spectrogram preparation
 4. Call syllable detection
 5. Combining syllable events into calls
 6. Call filtering
 7. Saving Results
 
-To execute these steps correctly for your target call, you must enter suitable parameter values into a *config.yml* file. The name of this file is passed as an argument on the `APexe` command line. `APexe` reads the file and executes the recognition steps. The command line will be explained in a subsequent section. This section describes how to set the parameters (using correct yaml syntax) for each of the seven recognition steps. We use, as a concrete example, the config file for the Boobook Owl, *Ninox boobook*.
+It helps to group these steps into three parts:
+- Steps 1 and 2: _Pre-processing_ steps to prepare the recording for subsequent analysis.
+- Steps 3 and 4: _Processing_ steps to encapsulate target syllables as acoustic events. 
+- Steps 5 to 7: _Post-processing_ steps which simplify the output from step 4 by combining related events, filtering events to remove false-positives and finally saving the remainder. 
 
-> NOTE: The config filename must have the correct structure in order to be recognized by `APexe`, in this case `Ecosounds.NinoxBoobook.yml`.
+To execute these seven steps correctly, you must enter suitable _parameter values_ into a _configuration file_. 
+
+.
+
+.
+
+## 5. Configuration files
+**DIY Call Recognizer** is a command line tool that requires a _configuration file_ (or _config_ file) in order to find calls of interest in a recording. The name of the config file is included as a command line argument. `APexe` reads the file containing a list of recognition _parameters_ and then executes the recognition steps accordingly. The command line will be described in a subsequent section. 
+
+> NOTE: The config filename must have the correct structure in order to be recognized by `APexe`. For example, if the config file name is `Ecosounds.NinoxBoobook.yml`:
 > - `Ecosounds` tells `APexe` that this is a call recognition task.
-> - `NinoxBoobook` tells `APexe` the scientific name of the target species. (Note there must no spaces in the file name.)
-> - `.yml` informs `APexe` what syntax to expect.
+> - `NinoxBoobook` tells `APexe` the scientific name of the target species, in this case the Boobook owl. (Note there must no spaces in the file name.)
+> - `.yml` informs `APexe` what syntax to expect, in this case YAML.
 
-Each parameter consists of a `name:value` pair. The name is followed by a `colon` which is followed by a typical or default value for the parameter. 
+
+
+`APexe` config files must be written in a language called YAML. For an introduction to YAML syntax please see this article: https://sweetohm.net/article/introduction-yaml.en.html. 
+We highly recommend using Notepad++ or Visual Studio Code to edit your YAML config files. Both are free, and both come with built in syntax highlighting for YAML files.
+
+### Parameters
+Config files contain a list of parameters, each of which is written as a name-value pair, for example:
+```yml
+SampleRate: 22050
+```
+
+Note that the parameter name `SampleRate` is followed by a colon, a space and then a value for the parameter. In this manual we will use typical or default values as examples. Obviously, the values must be "tuned" to the target calls. 
+
+
+In order to be read correctly, the 20 or more parameters in a config file must be nested correctly. They are typially ordered according to the seven recognition steps, that is:
+ 
+- Parameters that determine the pre-processing steps
+- Parameters that define target acoustic events.
+- Parameters that determine post-processing of the retrieved acoustic events.
+
 
 ### Profiles
-> **_TODO_** need to work on this description of PROFILES. 
 
-The layout of a _config.yml_ file is in three parts: 
-1. Parameters that determine pre-processing of the recording. The three parameters described in Steps 1 and 2 above are preprocessing parameters, that is, they determine steps prior to the search for acoustic events.
-2. Parameters grouped into _profiles_. Each profile defines an acoustic event.
-3. Parameters that determine post-processing of the retrieved acoustic events.
+Note that a config file may target more than one syllable or acoustic event. The parameters that describe a single acoustic event are grouped into what is called a _profile_. And all the profiles in a config file are listed under the heading or _key word_, `Profiles`. So we have a three level hierarchy:
+1. the _profile list_ headed by the key-word `Profiles`.
+2. the _profile_ headed by the profile name and event type.
+3. the profile _parameters_ consisting of a list of name:value pairs. 
 
-All acoustic events are characterised by distinct properties, such as their temporal duration, bandwidth, decibel intensity. In fact, every acoustic event is bounded by an _implicit_ rectangle or marquee whose height represents the bandwidth of the event and whose width represents the duration of the event. Even a chirp or whip which consists only of a single sloping *spectral track*, is enclosed by a rectangle, two of whose vertices sit at the start and end of the track.
+Here is an example:
+```yml
+Profiles:  
+    BoobookSyllable1: !ForwardTrackParameters
+        # min and max of the freq band to search
+        MinHertz: 400          
+        MaxHertz: 1100
+        # min and max time duration of call
+        MinDuration: 0.1
+        MaxDuration: 0.499
+    BoobookSyllable2: !ForwardTrackParameters
+        MinHertz: 400          
+        MaxHertz: 1100
+        MinDuration: 0.5
+        MaxDuration: 0.899
+    BoobookSyllable3: !ForwardTrackParameters
+        MinHertz: 400          
+        MaxHertz: 1100
+        MinDuration: 0.9
+        MaxDuration: 1.2
+```
 
-Each property of an acoustic event is described by a parameter or a `name:value` pair. A collection of parameter `name:value` pairs is referred to as a `Profile`. The `config.yml` file may contain any number of profiles describing the various syllables that make up the call. You can set up more than one profile for a syllable. Each profile is processed separately. The user ascribes a name and type to each profile. So we have a three level hierarchy:
-1. the `profile list`
-2. the `profile`
-3. the `profile parameters`. 
-
-> *IMPORTANT NOTE: In YAML syntax, the levels of a hierarchy are distinguished by indentation alone. It is most important that the indentation is retained or the config file will not be read correctly. 
+In this artificial example, three profiles (i.e. syllables or acoustic events) are defined. Each profile has a user defined name (eg. BoobookSyllable3) and type. The `!` following the colon should be read as "of event type".  Each profile has four parameters. (The lines starting with `#` are comments and ignored by the yaml interpreter.) All three profiles have the same values for `MinHertz` and `MaxHertz` but different values for their time duration. 
+ Note: Each profile is processed separately by `APexe`.
 
 
+> *IMPORTANT NOTE: In YAML syntax, the levels of a hierarchy are distinguished by indentation alone. It is extremely important that the indentation is retained or the config file will not be read correctly. Use four spaces for indentation, not the TAB key.
+
+**_TODO_** need to work on a description of the PROFILE TYPES e.g. `ForwardTrackParameters`, etc. 
+
+ An additional note about acoustic events:
+> All acoustic events are characterised by common properties, such as their temporal duration, bandwidth, decibel intensity. In fact, every acoustic event is bounded by an _implicit_ rectangle or marquee whose height represents the bandwidth of the event and whose width represents the duration of the event. Even a chirp or whip which consists only of a single sloping *spectral track*, is enclosed by a rectangle, two of whose vertices sit at the start and end of the track.
+
+.
+
+.
+
+## 6. The list of parameters
+
+This section describes how to set the parameters (using correct yaml syntax) for each of the seven recognition steps. We use, as a concrete example, the config file for the Boobook Owl, *Ninox boobook*.
 
 The `YAML` lines are followed by an explanation of the parameters.
 
@@ -310,7 +367,7 @@ HighResolutionIndicesConfig "../File.Name.HiResIndicesForRecognisers.yml"
 
 
 
-## 5. An efficient strategy to tune parameters
+## 7. An efficient strategy to tune parameters
 
 It will save you a lot of time if you tune the parameters in a logical sequence. The idea is to tune parameters in the sequence in which they appear in the *config.yml* file, keeping all "downstream" parameters as broad as possible. Here we summarize the strategy in five steps.
 
@@ -354,7 +411,7 @@ At the end of this process, you are likely to have a mixture of true-positives, 
 
 
 
-## 6. Eight steps to building a DIY Call Recognizer
+## 8. Eight steps to building a DIY Call Recognizer
 
 **Step 1.** Select several one-minute recordings that contain typical examples of your target call. It is also desirable that the background acoustic events in you chosen recordings are representative of the intended operational environment. If this is difficult, one trick to try is to play examples of your target call through a loud speaker in a location that is similar to your intended operational enviornment. You can then record the calls using your intended Acoustic Recording Unit (ARU).
 
@@ -377,7 +434,7 @@ At the end of this process, you are likely to have a mixture of true-positives, 
 .
 
 
-## 7. The DIY Call Recognizer command line
+## 9. The DIY Call Recognizer command line
 AnalysisPrograms.exe action arguments options
 
 ```powershell
@@ -433,7 +490,7 @@ AnalysisPrograms.exe action arguments options
 
 
 
-## 8. Building a larger data set
+## 10. Building a larger data set
 
 As indicated in Section 6, (*Eight steps to building a DIY Call Recognizer*), Step 7, it is useful to accumulate a set of recordings that both contain and *do not* contain the target call. The *negative* examples should contain acoustic events that have previously been detected as FPs. You now have two sets of recordings, one set containing the target call and one set containing previous FPs. The idea is to tune parameter values, while carefully watching for what effect the changes have on both data sets. Eventually, this data set could be used for machine learning purposes where you are not happy with the performance of the template recognizer.  
 
