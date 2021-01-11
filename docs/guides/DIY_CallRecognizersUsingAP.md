@@ -2,7 +2,7 @@
 # Welcome to "DIY Call Recognizer"
 
          
-> **DIY Call Recognizer** is a utility within **Analysis Programs**, a command line program that analyses long-duration audio-recordings of the enviornment. `AnalysisPrograms.exe` (abbreviated from here to `APexe`) contains many sub-programs or functions, one of which is the ability to write your own call recognizers. This manual describes how to write a **DIY call recognizer**. Refer to other manuals for other functionality [here](https://github.com/QutEcoacoustics/audio-analysis/blob/master/README.md).
+> **DIY Call Recognizer** is a utility within **Analysis Programs**, a command line program that analyses long-duration audio-recordings of the environment. `AnalysisPrograms.exe` (abbreviated from here to `APexe`) can execute several different utlities or functions, one of which is the ability to write your own call recognizer. This manual describes how to write a **DIY call recognizer**. Refer to other manuals [here](https://github.com/QutEcoacoustics/audio-analysis/blob/master/README.md) for other utilities.
 
 ## Contents ##
 1. Why bother with a DIY call recognizer?
@@ -39,7 +39,7 @@ A comparison of these recognizer types is shown in the following table and expla
 
  ### **TABLE. A comparison of three different kinds of call recognizer**
 
-| Type of Recognizer | Who does feature extraction? | Required dataset | Skill level | Accuracy |
+| Type of Recognizer | Who does the feature extraction? | Required dataset | Skill level | Accuracy |
 |:---:|:---:|:---:|:---:|:---:|
 |Template matching | User | Small (even 1!) | Least | Sometimes good |
 |Supervised machine learning | User | Moderate (50-100s) | Some | Better |
@@ -47,7 +47,7 @@ A comparison of these recognizer types is shown in the following table and expla
 ||||
 
 
-Hand-crafted, *rule-based* templates can be built using just one or a few examples of the target call. But like any rule-based *AI* system they are *brittle*, that is, they break easily if the target call falls even slightly outside the bounds of the rules. A supervised machine-learned model, for example an SVM or Random Forest, is far more resilient to slight changes in the range of the target call but they require many more training examples, on the order of 100 training examples. Finally, the convolutional neural network (CNN) is the most powerful learning machine available today (2020) but this power is achieved only by supplying thousands of examples of the each target call.
+Hand-crafted, *rule-based* templates can be built using just one or a few examples of the target call. But like any rule-based *AI* system, they are *brittle*, that is, they break easily if the target call falls even slightly outside the bounds of the rules. A supervised machine-learned model, for example an SVM or Random Forest, is far more resilient to slight changes in the range of the target call but they require many more training examples, on the order of 100 training examples. Finally, the convolutional neural network (CNN) is the most powerful learning machine available today (2020) but this power is achieved only by supplying thousands of examples of the each target call.
 
  **Note**: The following two rules apply to the preparation of training/test datsets, regardless of the recognizer type.
 
@@ -74,7 +74,6 @@ These thoughts are summarised in the following table:
 3. Allows you to collect a larger dataset for machine learning purposes.
 4. Exposes the variability of the target call. 
 
-.
 
 .
 
@@ -84,9 +83,6 @@ The algorithmic approach of **DIY Call Recognizer** makes particular assumptions
 **DIY Call Recognizer** attempts to recognizer calls in a noise-reduced spectrogram, which is processed as a matrix of real values but visualised as a grey-scale image. Each row of pixels is a frqeuency bin and each column of pixels is a time-frame. The value in each spectrogram/matrix cell (represented visually by an image pixel) is the acoustic intensity in decibels with respect to the background noise baseline. Note that the decibel values in a noise-reduced spectrogram are always positive.
 
 .
-
-.
-
 
 
 ## 3. Acoustic events
@@ -120,16 +116,15 @@ Harmonics are the same/similar shaped *whistle* or *chirp* repeated simultaneous
 
 .
 
-.
 
 ## 4. Detecting acoustic events
-**DIY Call Recognizer** detects or recognizes target calls in an audio recording using seven steps: 
+**DIY Call Recognizer** detects or recognizes target calls in an audio recording using a sequence of seven steps: 
 1. Audio resampling
 2. Audio segmentation
 3. Spectrogram preparation
 4. Call syllable detection
 5. Combining syllable events into calls
-6. Call filtering
+6. Syllable/call filtering
 7. Saving Results
 
 **_TODO_** need to check with Anthony if steps 1 and 2 are in correct order.
@@ -137,20 +132,20 @@ Harmonics are the same/similar shaped *whistle* or *chirp* repeated simultaneous
 It helps to group these steps into three parts:
 - Steps 1 and 2: _Pre-processing_ steps to prepare the recording for subsequent analysis.
 - Steps 3 and 4: _Processing_ steps to encapsulate target syllables as acoustic events. 
-- Steps 5 to 7: _Post-processing_ steps which simplify the output from step 4 by combining related events, filtering events to remove false-positives and finally saving the remainder. 
+- Steps 5 to 7: _Post-processing_ steps which simplify the output from step 4 by combining related events, filtering events to remove false-positives and finally saving those events which remain. 
 
 To execute these seven steps correctly, you must enter suitable _parameter values_ into a _configuration file_. 
 
-.
+
 
 .
 
 ## 5. Configuration files
-**DIY Call Recognizer** is a command line tool that requires a _configuration file_ (or _config_ file) in order to find calls of interest in a recording. The name of the config file is included as a command line argument. `APexe` reads the file containing a list of recognition _parameters_ and then executes the recognition steps accordingly. The command line will be described in a subsequent section. 
+**DIY Call Recognizer** is a command line tool. It requires a _configuration file_ (or _config_ file) in order to find calls of interest in a recording. The name of the config file is included as a command line argument. `APexe` reads the file containing a list of recognition _parameters_ and then executes the recognition steps accordingly. The command line will be described in a subsequent section. 
 
-> NOTE: The config filename must have the correct structure in order to be recognized by `APexe`. For example, if the config file name is `Ecosounds.NinoxBoobook.yml`:
+> NOTE: The config filename must have the correct structure in order to be recognized by `APexe`. For example, given a config file with the name `Ecosounds.NinoxBoobook.yml`:
 > - `Ecosounds` tells `APexe` that this is a call recognition task.
-> - `NinoxBoobook` tells `APexe` the scientific name of the target species, in this case the Boobook owl. (Note there must no spaces in the file name.)
+> - `NinoxBoobook` tells `APexe` the scientific name of the target species, in this case the Boobook owl. (Note there must be no spaces in the file name.)
 > - `.yml` informs `APexe` what syntax to expect, in this case YAML.
 
 
@@ -167,19 +162,19 @@ SampleRate: 22050
 Note that the parameter name `SampleRate` is followed by a colon, a space and then a value for the parameter. In this manual we will use typical or default values as examples. Obviously, the values must be "tuned" to the target calls. 
 
 
-In order to be read correctly, the 20 or more parameters in a config file must be nested correctly. They are typially ordered according to the seven recognition steps, that is:
+In order to be read correctly, the 20 or more parameters in a config file must be grouped and nested correctly. They are typically ordered according to the seven recognition steps above, that is:
  
 - Parameters that determine the pre-processing steps
-- Parameters that define target acoustic events.
+- Parameters that determine which acoustic events are the target.
 - Parameters that determine post-processing of the retrieved acoustic events.
 
 
 ### Profiles
 
-Note that a config file may target more than one syllable or acoustic event. The parameters that describe a single acoustic event are grouped into what is called a _profile_. And all the profiles in a config file are listed under the heading or _key word_, `Profiles`. So we have a three level hierarchy:
+A config file may target more than one syllable or acoustic event. The parameters that describe a single acoustic event are grouped into what is called a _profile_. And all the profiles in a config file are listed under the heading or _key word_, `Profiles`. So we have a three level hierarchy:
 1. the _profile list_ headed by the key-word `Profiles`.
-2. the _profile_ headed by the profile name and event type.
-3. the profile _parameters_ consisting of a list of name:value pairs. 
+2. the _profile_ headed by the profile name (the key word) and the event type.
+3. the profile _parameters_ consisting of a list of name:value pairs relevant to the profile.. 
 
 Here is an example:
 ```yml
@@ -203,35 +198,47 @@ Profiles:
         MaxDuration: 1.2
 ```
 
-In this artificial example, three profiles (i.e. syllables or acoustic events) are defined. Each profile has a user defined name (eg. BoobookSyllable3) and type. The `!` following the colon should be read as "of event type".  Each profile has four parameters. (The lines starting with `#` are comments and ignored by the yaml interpreter.) All three profiles have the same values for `MinHertz` and `MaxHertz` but different values for their time duration. 
+This artificial example illustrates three profiles (i.e. syllables or acoustic events) under the key word `Profiles`. Each profile has a user defined name (eg. BoobookSyllable3) and type. The `!` following the colon should be read as "of event type".  Each profile in this example has four parameters. (The lines starting with `#` are comments and ignored by the yaml interpreter.) All three profiles have the same values for `MinHertz` and `MaxHertz` but different values for their time duration. 
  Note: Each profile is processed separately by `APexe`.
 
 
 > *IMPORTANT NOTE: In YAML syntax, the levels of a hierarchy are distinguished by indentation alone. It is extremely important that the indentation is retained or the config file will not be read correctly. Use four spaces for indentation, not the TAB key.
 
-**_TODO_** need to work on a description of the PROFILE TYPES e.g. `ForwardTrackParameters`, etc. 
+### Profile Types
+In the above example the line `BoobookSyllable1: !ForwardTrackParameters` is to be read as "the name of the target syllable is "BoobookSyllable1" and its type is "ForwardTrackParameters". There are seven profile types corresponding to the seven kinds of acoustic event identified above. The event names are an attempt to describe what they sound like. But the corresponding profile type is a description of the algorithm to find the event. This table lists the event types and the corresonding profile type. This is vitally important when you come to write your own config files.
 
- An additional note about acoustic events:
-> All acoustic events are characterised by common properties, such as their temporal duration, bandwidth, decibel intensity. In fact, every acoustic event is bounded by an _implicit_ rectangle or marquee whose height represents the bandwidth of the event and whose width represents the duration of the event. Even a chirp or whip which consists only of a single sloping *spectral track*, is enclosed by a rectangle, two of whose vertices sit at the start and end of the track.
+| Acoustic Event  | Type of Corresponding Detection Algorithm |
+|:---:|:---:|:---:|:---:|:---:|
+|  Shriek | !Blob |
+|  Whistle | !HorizontalTrackParameters |
+|  Chirp   | !ForwardTrackParameters |
+|  Whip    | !UpwardsTrackParameters |
+|  Click   | !VerticalTrackParameters |
+|  Oscillation | !OscillationParameters |
+|  Harmonic | !HarmonicParameters |
+||||
 
-.
+
+ ### An additional note about acoustic events
+> All the seven types of acoustic event are characterised by common properties, such as their temporal duration, bandwidth, decibel intensity. In fact, every acoustic event is bounded by an _implicit_ rectangle or marquee whose height represents the bandwidth of the event and whose width represents the duration of the event. Even a _chirp_ or _whip_ which consists only of a single sloping *spectral track*, is enclosed by a rectangle, two of whose vertices sit at the start and end of the track.
+
 
 .
 
 ## 6. Parameter names and values
 
-This section describes how to set the parameters (using correct yaml syntax) for each of the seven recognition steps. We use, as a concrete example, the config file for the Boobook Owl, *Ninox boobook*.
+This section describes how to set the parameters (using correct yaml syntax) for each of the seven call-recognition steps. We use, as a concrete example, the config file for the Boobook Owl, *Ninox boobook*.
 
 The `YAML` lines are followed by an explanation of the parameters.
 
-### Step 1. Recording resampling
-If this parameter is not specified in the config file, the default is to resample (up- or down-sample) the recording to 22050 samples per second. This has the effect of limiting the maximum frequency in the recording to 11025 Hertz.   
+### Step 1. Audio resampling
+Specifies the sample rate at which the recording will be processed.   
 ```yml
 ResampleRate: 22050
 ```
-> *ResampleRate* must be twice the desired Nyquist. Specify the resample rate that gives the best result for your target call. If the target call is in a low frequency band (e.g. < 2kHz), then lower the resample rate to somewhat more than twice the maximum frequency of interest. This will reduce processing time and produce better focused spectrograms. If you down-sample, you will lose high frequency content. If you up-sample, there will be undefined "noise" in spectrograms above the original Nyquist.
+> If this parameter is not specified in the config file, the default is to resample the recording (up or down) to 22050 samples per second. This has the effect of limiting the maximum frequency in the recording to 11025 Hertz.  *ResampleRate* must be twice the desired Nyquist. Specify the resample rate that gives the best result for your target call. If the target call is in a low frequency band (e.g. < 2kHz), then lower the resample rate to somewhat more than twice the maximum frequency of interest. This will reduce processing time and produce better focused spectrograms. If you down-sample, you will lose high frequency content. If you up-sample, there will be undefined "noise" in spectrograms above the original Nyquist.
 
-### Step 2. Recording segmentation
+### Step 2. Audio segmentation
 Analysis of long recordings is made tractable by breaking them into shorter (typically 60-second) segments.
 ```yml
 SegmentDuration: 60    
@@ -248,11 +255,11 @@ WindowFunction: HANNING
 BgNoiseThreshold: 0  
 ``` 
 
-> *FrameSize* and *FrameStep* determine the time/frequency resolution of the spectrogram. Typical values are 512 and 0 samples respectively. There is a trade-off between time resolution and frequency resolution; finding the best compromise is really a matter of trial and error. If your target call is of long duration with little temporal variation (e.g. a whistle) then *FrameSize* can be increased to 1024 or even 2048. (NOTE: The value of *FrameSize* must be a power of 2.) To capture more temporal variation in your target syllables, decrease *FrameSize* and/or decrease *FrameStep*. A typical *FrameStep* might be half the *FrameSize* but does not need to be a power of 2.
+> *FrameSize* and *FrameStep* are key parameters in constructing a spectrogram because they determine its time/frequency resolution. Typical values are 512 and 0 samples respectively. There is a trade-off between time resolution and frequency resolution; finding the best compromise is really a matter of trial and error. If your target syllable is of long duration with little temporal variation (e.g. a whistle) then *FrameSize* can be increased to 1024 or even 2048. (NOTE: The value of *FrameSize* must be a power of 2.) To capture more temporal variation in your target syllables, decrease *FrameSize* and/or decrease *FrameStep*. A typical *FrameStep* might be half the *FrameSize* but does *not* need to be a power of 2.
 
-> The default value for *WindowFunction* is `HANNING`. There should no need to ever change this but you might like to try a `HAMMING` window if you are not satisfied with the appearance of your spectrograms.
+> The default value for *WindowFunction* is `HANNING`. There should never be a need to change this but you might like to try a `HAMMING` window if you are not satisfied with the appearance of your spectrograms.
 
-> The "Bg" in *BgNoiseThreshold* means *background*. This parameter determines the degree of severity of noise removal from the spectrogram. The units are decibels. Zero is the safest default value and probably does not need to be changed. Increasing the value to say 3-4 decibels increases the likelihood that you will lose some important components of you target calls. For more on the noise removal algorithm used by `APexe` see [Towsey, Michael W. (2013) Noise removal from wave-forms and spectrograms derived from natural recordings of the environment.](https://eprints.qut.edu.au/61399/). 
+> The "Bg" in *BgNoiseThreshold* means *background*. This parameter determines the degree of severity of noise removal from the spectrogram. The units are decibels. Zero is the safest default value and probably does not need to be changed. Increasing the value to say 3-4 decibels increases the likelihood that you will lose some important components of your target calls. For more on the noise removal algorithm used by `APexe` see [Towsey, Michael W. (2013) Noise removal from wave-forms and spectrograms derived from natural recordings of the environment.](https://eprints.qut.edu.au/61399/). 
 
 
 ![Templates have parameters](./Images/TemplatesHaveParameters.png)
@@ -281,10 +288,105 @@ Profiles:
 
 > _ComponentName_ and _SpeciesName_ are user defined words that describe the syllable/event defined in the Profile. _MinHertz_ and _MaxHertz_ define the frequency band in which a search is to be made for the target event. Note that these parameters define the bounds of the search band _not_ the bounds of the event itself. _MinDuration_ and _MaxDuration_ set the minimum and maximum time duration (in seconds) of the target event. At the present time these are hard bounds. 
 
-NOTE: The above parameters are common to all target events. Some more complex structired events such as oscillations and harmonics have additional parameters. These are defined below. 
+The above parameters are common to all target events. _Oscillations_ and _harmonics_, being more complex events, have additional parameters as described below. 
 
+> **_Oscillation Events_**: The algorithm to find oscillation events uses a discrete cosine transform or *DCT*. Setting the correct DCT for the target syllable requires additional parameters. Here is a section of a config file for the flying fox. This profile detects the rythmic sound of wing beats as a flying fox takes off or comes in to land. 
+```yml
+Profiles:
+  Territorial: !BlobParameters
+    MinHz: 800          
+    MaxHz: 8000
+    MinDuration: 0.15
+    MaxDuration: 0.8
+    DecibelThreshold: 9.0
+  Wingbeats: !OscillationParameters
+    # The search band
+    MinHz: 200          
+    MaxHz: 2000
+    # Min & max duration for sequence of wingbeats.
+    MinDuration: 1.0
+    MaxDuration: 10.0        
+    DecibelThreshold: 6.0
 
-> **_TODO_** a description of the additional parameters for oscillations and harmonics 
+    # Wingbeat - oscillations per second
+    # Ignore oscillation rates below the min & above the max threshold.        
+    MinOscilFreq: 4        
+    MaxOscilFreq: 6
+    
+    # DCT duration in seconds 
+    DctDuration: 0.5
+
+    # minimum acceptable value of a DCT coefficient
+    DctThreshold: 0.5
+        
+    # Event threshold - use this to determine FP / FN trade-off for events.
+    EventThreshold: 0.5
+
+    SpeciesName = "DTMF",
+    FrameSize = 512,
+    FrameStep = 512,
+    BgNoiseThreshold = 0.0,
+
+    MaxHertz = 1050,
+    MinHertz = 700,
+    DctDuration = 1.0,
+    MinOscillationFrequency = 1,
+    MaxOscillationFrequency = 2,
+    MinDuration = 4,
+    MaxDuration = 8,
+    EventThreshold = 0.3,
+    DecibelThresholds = new double?[] { 0.0 },
+    BottomHertzBuffer = 0,
+    TopHertzBuffer = 0,
+```
+> Note the first five parameters are common to all events - they determine the search band, the allowable event duration and the decibel threshold. The remaining five parameters determine the DCT search for oscillations. _MinOscilFreq_ and _MaxOscilFreq_ specify the oscillation bounds in beats or oscillations per second. These values were established by measuring a sample of flying fox wingbeats. The next two parameters, the DCT duration in seconds and the DCT threshold can be tricky to establish but are critical for success. The DCT is computationally expensive but for accuracy it needs to span at least two or three oscillations. In this case a duration of 0.5 seconds is just enough to span at least two oscillations. The output from a DCT operation is a set of coefficients (taking values in [0, 1]), the largest of which indicates the likely oscillation rate. _DctThreshold_ sets the minimum value to be an acceptable value. Lowering _DctThreshold_ increases the likelihood that random noise will be accepted as an oscillation; increasing _DctThreshold_ increases the likelihood that a target oscillation is rejected. The optimum values for    
+_DctDuration_ and _DctThreshold_ interact. It requires some experimentation to find the best values for your target syllable. Experiment with _DctDuration_ first and the _DctThreshold_.
+ 
+**_Harmonic Events_**: The algorithm to find harmonic events can be visualised as similar to the oscillations algorithm, but rotated 90 degrees. It uses a DCT oriented in a vertical direction and requires similar additional parameters.
+
+```yml
+Profiles:
+    Speech: !HarmonicParameters
+    # The search band
+    MinHz: 200          
+    MaxHz: 2000
+    # Min & max duration for sequence of wingbeats.
+    MinDuration: 1.0
+    MaxDuration: 10.0        
+    DecibelThreshold: 6.0
+
+    #  - oscillations per second
+    # Ignore oscillation rates below the min & above the max threshold.        
+    MinOscilFreq: 4        
+    MaxOscilFreq: 6
+    
+    # DCT duration in seconds 
+    DctDuration: 0.5
+
+    # minimum acceptable value of a DCT coefficient
+    DctThreshold: 0.5
+        
+    # Event threshold - use this to determine FP / FN trade-off for events.
+    EventThreshold: 0.5
+                
+    // Set up the recognizer parameters.
+    int samplerate = 22050
+    var windowSize = 512;
+    var windowStep = 512;
+
+    var minDuration = 0.2;
+    var maxDuration = 1.1;
+    var decibelThreshold = 2.0;
+    var minHertz = 500;
+    var maxHertz = 5000;
+
+    var dctThreshold = 0.15;
+    var minFormantGap = 400;
+    var maxFormantGap = 1200;
+    
+```
+
+> **_TODO_** a description of the additional parameters for harmonics 
 
 ### Step 5. Combining syllables into calls
 The parameters for the two *post-processing* steps. steps 5 and 6, are all indented and come under the keyword `PostProcessing`.
