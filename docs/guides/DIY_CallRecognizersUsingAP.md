@@ -266,13 +266,22 @@ BgNoiseThreshold: 0
 
 ### Step 4. Call syllable detection
 
-Here begins the declaration of the `Profiles` section in the `Ecosounds.NinoxBoobook.yml` file. It contains just one profile. The profile is named `BoobookSyllable` and is declared as type `ForwardTrackParameters` (a chirp). Indented below the profile declaration are seven parameters.
+**_TODO_** CHECK THIS PROFILE BEGINS EARLIER
+
+Here begins the declaration of the `Profiles` section in the `Ecosounds.NinoxBoobook.yml` file. 
+
+**_TODO_** CHECK THIS PROFILE BEGINS EARLIER
+
+It contains just one profile. The profile is named `BoobookSyllable` and is declared as type `ForwardTrackParameters` (a chirp). Indented below the profile declaration are seven parameters.
 ```yml
 Profiles:  
     BoobookSyllable: !ForwardTrackParameters
         ComponentName: RidgeTrack 
         SpeciesName: NinoxBoobook
-        
+        FrameSize: 512
+        FrameStep: 512
+        BgNoiseThreshold: 0.0
+       
         # min and max of the freq band to search
         MinHertz: 400          
         MaxHertz: 1100
@@ -293,100 +302,65 @@ The above parameters are common to all target events. _Oscillations_ and _harmon
 > **_Oscillation Events_**: The algorithm to find oscillation events uses a discrete cosine transform or *DCT*. Setting the correct DCT for the target syllable requires additional parameters. Here is a section of a config file for the flying fox. This profile detects the rythmic sound of wing beats as a flying fox takes off or comes in to land. 
 ```yml
 Profiles:
-  Territorial: !BlobParameters
-    MinHz: 800          
-    MaxHz: 8000
-    MinDuration: 0.15
-    MaxDuration: 0.8
-    DecibelThreshold: 9.0
-  Wingbeats: !OscillationParameters
-    # The search band
-    MinHz: 200          
-    MaxHz: 2000
-    # Min & max duration for sequence of wingbeats.
-    MinDuration: 1.0
-    MaxDuration: 10.0        
-    DecibelThreshold: 6.0
-
-    # Wingbeat - oscillations per second
-    # Ignore oscillation rates below the min & above the max threshold.        
-    MinOscilFreq: 4        
-    MaxOscilFreq: 6
-    
-    # DCT duration in seconds 
-    DctDuration: 0.5
-
-    # minimum acceptable value of a DCT coefficient
-    DctThreshold: 0.5
+    Territorial: !BlobParameters
+        MinHertz: 800          
+        MaxHertz: 8000
+        MinDuration: 0.15
+        MaxDuration: 0.8
+        DecibelThresholds:
+            - 9.0
+    Wingbeats: !OscillationParameters
+        # The search band
+        MinHertz: 200          
+        MaxHertz: 2000
+        # Min & max duration for sequence of wingbeats.
+        MinDuration: 1.0
+        MaxDuration: 10.0        
+        DecibelThresholds:
+            - 6.0
+        # Wingbeat bounds - oscillations per second       
+        MinOscillationFrequency: 4        
+        MaxOscillationFrequency: 6    
+        # DCT duration in seconds 
+        DctDuration: 0.5
+        # minimum acceptable value of a DCT coefficient
+        DctThreshold: 0.5
         
-    # Event threshold - use this to determine FP / FN trade-off for events.
-    EventThreshold: 0.5
-
-    SpeciesName = "DTMF",
-    FrameSize = 512,
-    FrameStep = 512,
-    BgNoiseThreshold = 0.0,
-
-    MaxHertz = 1050,
-    MinHertz = 700,
-    DctDuration = 1.0,
-    MinOscillationFrequency = 1,
-    MaxOscillationFrequency = 2,
-    MinDuration = 4,
-    MaxDuration = 8,
-    EventThreshold = 0.3,
-    DecibelThresholds = new double?[] { 0.0 },
-    BottomHertzBuffer = 0,
-    TopHertzBuffer = 0,
+        # Event threshold - use this to determine FP/FN trade-off.
+        EventThreshold: 0.5
 ```
 > Note the first five parameters are common to all events - they determine the search band, the allowable event duration and the decibel threshold. The remaining five parameters determine the DCT search for oscillations. _MinOscilFreq_ and _MaxOscilFreq_ specify the oscillation bounds in beats or oscillations per second. These values were established by measuring a sample of flying fox wingbeats. The next two parameters, the DCT duration in seconds and the DCT threshold can be tricky to establish but are critical for success. The DCT is computationally expensive but for accuracy it needs to span at least two or three oscillations. In this case a duration of 0.5 seconds is just enough to span at least two oscillations. The output from a DCT operation is a set of coefficients (taking values in [0, 1]), the largest of which indicates the likely oscillation rate. _DctThreshold_ sets the minimum value to be an acceptable value. Lowering _DctThreshold_ increases the likelihood that random noise will be accepted as an oscillation; increasing _DctThreshold_ increases the likelihood that a target oscillation is rejected. The optimum values for    
 _DctDuration_ and _DctThreshold_ interact. It requires some experimentation to find the best values for your target syllable. Experiment with _DctDuration_ first and the _DctThreshold_.
  
+**_TODO_** include an image of the DCT applied to oscillations and harmonics 
+
+
 **_Harmonic Events_**: The algorithm to find harmonic events can be visualised as similar to the oscillations algorithm, but rotated 90 degrees. It uses a DCT oriented in a vertical direction and requires similar additional parameters.
 
 ```yml
 Profiles:
     Speech: !HarmonicParameters
-    # The search band
-    MinHz: 200          
-    MaxHz: 2000
-    # Min & max duration for sequence of wingbeats.
-    MinDuration: 1.0
-    MaxDuration: 10.0        
-    DecibelThreshold: 6.0
+        FrameSize: 512
+        FrameStep: 512
+        # The search band
+        MinHertz: 500          
+        MaxHertz: 5000
+        # Min & max duration for sequence of wingbeats.
+        MinDuration: 0.2
+        MaxDuration: 1.0        
+        DecibelThreshold: 2.0
 
-    #  - oscillations per second
-    # Ignore oscillation rates below the min & above the max threshold.        
-    MinOscilFreq: 4        
-    MaxOscilFreq: 6
+        #  Harmonics
+        minFormantGap: 400        
+        maxFormantGap: 1200
     
-    # DCT duration in seconds 
-    DctDuration: 0.5
-
-    # minimum acceptable value of a DCT coefficient
-    DctThreshold: 0.5
-        
-    # Event threshold - use this to determine FP / FN trade-off for events.
-    EventThreshold: 0.5
-                
-    // Set up the recognizer parameters.
-    int samplerate = 22050
-    var windowSize = 512;
-    var windowStep = 512;
-
-    var minDuration = 0.2;
-    var maxDuration = 1.1;
-    var decibelThreshold = 2.0;
-    var minHertz = 500;
-    var maxHertz = 5000;
-
-    var dctThreshold = 0.15;
-    var minFormantGap = 400;
-    var maxFormantGap = 1200;
-    
+        # DCT duration in seconds
+        DctDuration: 0.5 **_TODO_** CHECK THIS
+        # minimum acceptable value of a DCT coefficient
+        DctThreshold: 0.15         
+        # Event threshold - use this to determine FP/FN trade-off.
+        EventThreshold: 0.5
 ```
-
-> **_TODO_** a description of the additional parameters for harmonics 
 
 ### Step 5. Combining syllables into calls
 The parameters for the two *post-processing* steps. steps 5 and 6, are all indented and come under the keyword `PostProcessing`.
