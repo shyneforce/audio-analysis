@@ -58,7 +58,7 @@ Hand-crafted, *rule-based* templates can be built using just one or a few exampl
 
 To summarise (and at the risk of over-simplification), a hand-crafted template has low cost and low benefit; a machine-learned model has medium cost and medium benefit, while a deep-learned model has high cost and high benefit. The cost/benefit ratio in each case is similar but here is the catch - the cost must be paid before you get the benefit! Furthermore, in a typical ecological study, a bird species is of interest precisely because it is threatened or cryptic. When not many calls are available, the more sophisticated approaches become untenable. Hence there is a place for hand-crafted templates in call recognition.
 
-These thoughts are summarised in the following table:
+These ideas are summarised in the following table:
 | Type of Recognizer | Cost | Benefit | Cost/benefit ratio | The catch !|
 |:---:|:---:|:---:|:---:|:---:|
 |  Template matching | Low | Low | A number | You must pay ... |
@@ -87,7 +87,7 @@ The algorithmic approach of **DIY Call Recognizer** makes particular assumptions
 
 ## 3. Acoustic events
 
-An *acoustic event* is defined as a contiguous set of spectrogram cells/pixels whose decibel values exceed some user defined threshold. In the ideal case, an acoustic event should encompass a discrete component of acoustic energy within a call, syllable or harmonic. It will be separated from other acoustic events by intervening pixels having decibel values *below* the user defined threshold. **DIY Call Recognizer** contains algorithms to recognize seven different kinds of acoustic event based on their shape in the spectrogram. We describe these in turn.
+An *acoustic event* is defined as a contiguous set of spectrogram cells/pixels whose decibel values exceed some user defined threshold. In the ideal case, an acoustic event should encompass a discrete component of acoustic energy within a call, syllable or harmonic. It will be separated from other acoustic events by intervening pixels having decibel values *below* the user defined threshold. **DIY Call Recognizer** contains algorithms to recognize seven different kinds of _"generic"_ acoustic event based on their shape in the spectrogram. We describe these in turn.
 
 ### 3.1. Shreik 
 This is a diffuse acoustic event that is extended in both time and frequency. While a shriek may have some internal structure, it is treated by **DIY Call Recognizer** as a "blob" of acoustic energy. A typical example is a parrot shriek.
@@ -129,26 +129,27 @@ Harmonics are the same/similar shaped *whistle* or *chirp* repeated simultaneous
 
 **_TODO_** need to check with Anthony if steps 1 and 2 are in correct order.
 
-It helps to group these steps into three parts:
+It helps to group these detection steps into three parts:
 - Steps 1 and 2: _Pre-processing_ steps to prepare the recording for subsequent analysis.
-- Steps 3 and 4: _Processing_ steps to encapsulate target syllables as acoustic events. 
-- Steps 5 to 7: _Post-processing_ steps which simplify the output from step 4 by combining related events, filtering events to remove false-positives and finally saving those events which remain. 
+- Steps 3 and 4: _Processing_ steps to identify target syllables as _"generic"_ acoustic events. 
+- Steps 5 to 7: _Post-processing_ steps which simplify the output from step 4 by combining related acoustic events, filtering events to remove false-positives and finally saving those events which remain. 
 
-To execute these seven steps correctly, you must enter suitable _parameter values_ into a _configuration file_. 
+To execute these seven detection steps correctly, you must enter suitable _parameter values_ into a _configuration file_. 
 
 
 
 .
 
 ## 5. Configuration files
-**DIY Call Recognizer** is a command line tool. It requires a _configuration file_ (or _config_ file) in order to find calls of interest in a recording. The name of the config file is included as a command line argument. `APexe` reads the file containing a list of recognition _parameters_ and then executes the recognition steps accordingly. The command line will be described in a subsequent section. 
+### The structure of the config file name
+**DIY Call Recognizer** is a command line tool. It requires a _configuration file_ (henceforth, _config_ file) in order to find calls of interest in a recording. The name of the config file is included as a command line argument. `APexe` reads the file containing a list of _parameters_ and then executes the detection steps accordingly. The command line will be described in a subsequent section. 
 
 > NOTE: The config filename must have the correct structure in order to be recognized by `APexe`. For example, given a config file with the name `Ecosounds.NinoxBoobook.yml`:
 > - `Ecosounds` tells `APexe` that this is a call recognition task.
 > - `NinoxBoobook` tells `APexe` the scientific name of the target species, in this case the Boobook owl. (Note there must be no spaces in the file name.)
 > - `.yml` informs `APexe` what syntax to expect, in this case YAML.
 
-
+**_TODO_** need to check with Anthony re changes to structure of the config file name.
 
 `APexe` config files must be written in a language called YAML. For an introduction to YAML syntax please see this article: https://sweetohm.net/article/introduction-yaml.en.html. 
 We highly recommend using Notepad++ or Visual Studio Code to edit your YAML config files. Both are free, and both come with built in syntax highlighting for YAML files.
@@ -159,14 +160,14 @@ Config files contain a list of parameters, each of which is written as a name-va
 SampleRate: 22050
 ```
 
-Note that the parameter name `SampleRate` is followed by a colon, a space and then a value for the parameter. In this manual we will use typical or default values as examples. Obviously, the values must be "tuned" to the target calls. 
+Note that the parameter name `SampleRate` is followed by a colon, a space and then a value for the parameter. In this manual we will use typical or default values as examples. Obviously, the values must be "tuned" to the target syllables. 
 
 
 In order to be read correctly, the 20 or more parameters in a config file must be grouped and nested correctly. They are typically ordered according to the seven recognition steps above, that is:
  
-- Parameters that determine the pre-processing steps
-- Parameters that determine which acoustic events are the target.
-- Parameters that determine post-processing of the retrieved acoustic events.
+- Parameters that determine the pre-processing (detection steps 1 and 2)
+- Parameters that determine which acoustic events are the target (detection steps 3 and 4)
+- Parameters that determine post-processing of the retrieved acoustic events (steps 5, 6, 7)
 
 
 ### Profiles
@@ -176,7 +177,7 @@ A config file may target more than one syllable or acoustic event. The parameter
 2. the _profile_ headed by the profile name (the key word) and the event type.
 3. the profile _parameters_ consisting of a list of name:value pairs relevant to the profile.. 
 
-Here is an example:
+Here is an (abbreviated) example:
 ```yml
 Profiles:  
     BoobookSyllable1: !ForwardTrackParameters
@@ -198,36 +199,35 @@ Profiles:
         MaxDuration: 1.2
 ```
 
-This artificial example illustrates three profiles (i.e. syllables or acoustic events) under the key word `Profiles`. Each profile has a user defined name (eg. BoobookSyllable3) and type. The `!` following the colon should be read as "of event type".  Each profile in this example has four parameters. (The lines starting with `#` are comments and ignored by the yaml interpreter.) All three profiles have the same values for `MinHertz` and `MaxHertz` but different values for their time duration. 
- Note: Each profile is processed separately by `APexe`.
+This artificial example illustrates three profiles (i.e. syllables or acoustic events) under the key word `Profiles`. Each profile has a user defined name (eg. BoobookSyllable3) and type. The `!` following the colon should be read as "of event type".  Each profile in this example has four parameters. (The lines starting with `#` are comments and ignored by the yaml interpreter.) All three profiles have the same values for `MinHertz` and `MaxHertz` but different values for their time duration. Each profile is processed separately by `APexe`.
 
 
-> *IMPORTANT NOTE: In YAML syntax, the levels of a hierarchy are distinguished by indentation alone. It is extremely important that the indentation is retained or the config file will not be read correctly. Use four spaces for indentation, not the TAB key.
+> *IMPORTANT NOTE ABOUT INDENTATION: In YAML syntax, the levels of a hierarchy are distinguished by indentation alone. It is extremely important that the indentation is retained or the config file will not be read correctly. Use four spaces for indentation, not the TAB key.
 
 ### Profile Types
-In the above example the line `BoobookSyllable1: !ForwardTrackParameters` is to be read as "the name of the target syllable is "BoobookSyllable1" and its type is "ForwardTrackParameters". There are seven profile types corresponding to the seven kinds of acoustic event identified above. The event names are an attempt to describe what they sound like. But the corresponding profile type is a description of the algorithm to find the event. This table lists the event types and the corresonding profile type. This is vitally important when you come to write your own config files.
+In the above example the line `BoobookSyllable1: !ForwardTrackParameters` is to be read as "the name of the target syllable is "BoobookSyllable1" and its type is "ForwardTrackParameters". There are seven profile types corresponding to the seven kinds of acoustic event identified above. The event names are an attempt to describe what they sound like. But the corresponding profile type is descriptive of the algorithm used to find the event. This table lists the seven "generic" events and their corresponding profile types. It is vitally important that you define the correct profile type when write your own config file.
 
-| Acoustic Event  | Type of Corresponding Detection Algorithm |
+| Acoustic Event  | Type of the Corresponding Detection Algorithm |
 |:---:|:---:|:---:|:---:|:---:|
-|  Shriek | !Blob |
-|  Whistle | !HorizontalTrackParameters |
-|  Chirp   | !ForwardTrackParameters |
-|  Whip    | !UpwardsTrackParameters |
-|  Click   | !VerticalTrackParameters |
-|  Oscillation | !OscillationParameters |
-|  Harmonic | !HarmonicParameters |
+|  Shriek | `!Blob` |
+|  Whistle | `!HorizontalTrackParameters` |
+|  Chirp   | `!ForwardTrackParameters` |
+|  Whip    | `!UpwardsTrackParameters` |
+|  Click   | `!VerticalTrackParameters` |
+|  Oscillation | `!OscillationParameters` |
+|  Harmonic | `!HarmonicParameters` |
 ||||
 
 
  ### An additional note about acoustic events
-> All the seven types of acoustic event are characterised by common properties, such as their temporal duration, bandwidth, decibel intensity. In fact, every acoustic event is bounded by an _implicit_ rectangle or marquee whose height represents the bandwidth of the event and whose width represents the duration of the event. Even a _chirp_ or _whip_ which consists only of a single sloping *spectral track*, is enclosed by a rectangle, two of whose vertices sit at the start and end of the track.
+> All seven "generic" acoustic events are characterised by common properties, such as their temporal duration, bandwidth, decibel intensity. In fact, every acoustic event is bounded by an _implicit_ rectangle or marquee whose height represents the bandwidth of the event and whose width represents the duration of the event. Even a _chirp_ or _whip_ which consists only of a single sloping *spectral track*, is enclosed by a rectangle, two of whose vertices sit at the start and end of the track.
 
 
 .
 
 ## 6. Parameter names and values
 
-This section describes how to set the parameters (using correct yaml syntax) for each of the seven call-recognition steps. We use, as a concrete example, the config file for the Boobook Owl, *Ninox boobook*.
+This section describes how to set the parameters (using correct yaml syntax) for each of the seven call-detection steps. We use, as a concrete example, the config file for the Boobook Owl, *Ninox boobook*.
 
 The `YAML` lines are followed by an explanation of the parameters.
 
@@ -236,7 +236,7 @@ Specifies the sample rate at which the recording will be processed.
 ```yml
 ResampleRate: 22050
 ```
-> If this parameter is not specified in the config file, the default is to resample the recording (up or down) to 22050 samples per second. This has the effect of limiting the maximum frequency in the recording to 11025 Hertz.  *ResampleRate* must be twice the desired Nyquist. Specify the resample rate that gives the best result for your target call. If the target call is in a low frequency band (e.g. < 2kHz), then lower the resample rate to somewhat more than twice the maximum frequency of interest. This will reduce processing time and produce better focused spectrograms. If you down-sample, you will lose high frequency content. If you up-sample, there will be undefined "noise" in spectrograms above the original Nyquist.
+> If this parameter is not specified in the config file, the default is to _resample_ the recording (up or down) to 22050 samples per second. This has the effect of limiting the maximum frequency in the recording (the Nyquist) to 11025 Hertz.  *ResampleRate* must be twice the desired Nyquist. Specify the resample rate that gives the best result for your target call. If the target call is in a low frequency band (e.g. < 2kHz), then lower the resample rate to somewhat more than twice the maximum frequency of interest. This will reduce processing time and produce better focused spectrograms. If you down-sample, you will lose high frequency content. If you up-sample, there will be undefined "noise" in spectrograms above the original Nyquist.
 
 ### Step 2. Audio segmentation
 Analysis of long recordings is made tractable by breaking them into shorter (typically 60-second) segments.
@@ -247,32 +247,33 @@ SegmentOverlap: 0
 > The default values are 60 and 0 seconds respectively and these seldom need to be changed. You may wish to work at finer resolution by changing SegmentDuration to 20 or 30 seconds. If your target call is comparitively long (such as a koala bellow, e.g. greater than 10 - 15 seconds), you could increase SegmentDuration to 70 seconds and increase SegmentOverlap to 10 seconds. This reduces the probability that a call will be split across segments. It also maintains a 60-second interval between segment-starts which helps to identify where you are in a recording.
 
 ### Step 3. Spectrogram preparation
-There are four parameters that determine how a spectrogram is derived from each recording segment.
-```yml    
-FrameSize: 512    
-FrameStep: 256    
-WindowFunction: HANNING   
-BgNoiseThreshold: 0  
+
+As noted above, the parameters for detection steps 3 and 4 are grouped into _profiles_ and multiple _profiles_ are nested under the keyword `Profiles`. The example below declares just one profile under the kepword `Profiles`. Its name is `BoobookSyllable` which is declared as type `ForwardTrackParameters` (a chirp). Indented below the profile declaration are its first six parameters.
+```yml
+Profiles:  
+    BoobookSyllable: !ForwardTrackParameters
+        SpeciesName: NinoxBoobook
+        ComponentName: Chirp 
+        FrameSize: 512
+        FrameStep: 512
+        WindowFunction: HANNING
+        BgNoiseThreshold: 0.0
 ``` 
 
-> *FrameSize* and *FrameStep* are key parameters in constructing a spectrogram because they determine its time/frequency resolution. Typical values are 512 and 0 samples respectively. There is a trade-off between time resolution and frequency resolution; finding the best compromise is really a matter of trial and error. If your target syllable is of long duration with little temporal variation (e.g. a whistle) then *FrameSize* can be increased to 1024 or even 2048. (NOTE: The value of *FrameSize* must be a power of 2.) To capture more temporal variation in your target syllables, decrease *FrameSize* and/or decrease *FrameStep*. A typical *FrameStep* might be half the *FrameSize* but does *not* need to be a power of 2.
+> The first two parameters, _SpeciesName_ and _ComponentName_, are optional. They assign descriptive names to the target species and syllable.
+
+> The next four parameters determine how a spectrogram is derived from each recording segment. *FrameSize* and *FrameStep* determine the time/frequency resolution of the spectrogram. Typical values are 512 and 0 samples respectively. There is a trade-off between time resolution and frequency resolution; finding the best compromise is really a matter of trial and error. If your target syllable is of long duration with little temporal variation (e.g. a whistle) then *FrameSize* can be increased to 1024 or even 2048. (NOTE: The value of *FrameSize* must be a power of 2.) To capture more temporal variation in your target syllables, decrease *FrameSize* and/or decrease *FrameStep*. A typical *FrameStep* might be half the *FrameSize* but does *not* need to be a power of 2.
 
 > The default value for *WindowFunction* is `HANNING`. There should never be a need to change this but you might like to try a `HAMMING` window if you are not satisfied with the appearance of your spectrograms.
 
-> The "Bg" in *BgNoiseThreshold* means *background*. This parameter determines the degree of severity of noise removal from the spectrogram. The units are decibels. Zero is the safest default value and probably does not need to be changed. Increasing the value to say 3-4 decibels increases the likelihood that you will lose some important components of your target calls. For more on the noise removal algorithm used by `APexe` see [Towsey, Michael W. (2013) Noise removal from wave-forms and spectrograms derived from natural recordings of the environment.](https://eprints.qut.edu.au/61399/). 
+> The "Bg" in *BgNoiseThreshold* means *background*. This parameter determines the degree of severity of noise removal from the spectrogram. The units are decibels. Zero sets the least severe noise removal. It is the safest default value and probably does not need to be changed. Increasing the value to say 3-4 decibels increases the likelihood that you will lose some important components of your target calls. For more on the noise removal algorithm used by `APexe` see [Towsey, Michael W. (2013) Noise removal from wave-forms and spectrograms derived from natural recordings of the environment.](https://eprints.qut.edu.au/61399/). 
 
 
 ![Templates have parameters](./Images/TemplatesHaveParameters.png)
 
 ### Step 4. Call syllable detection
 
-**_TODO_** CHECK THIS PROFILE BEGINS EARLIER
-
-Here begins the declaration of the `Profiles` section in the `Ecosounds.NinoxBoobook.yml` file. 
-
-**_TODO_** CHECK THIS PROFILE BEGINS EARLIER
-
-It contains just one profile. The profile is named `BoobookSyllable` and is declared as type `ForwardTrackParameters` (a chirp). Indented below the profile declaration are seven parameters.
+A complete definition of the `BoobookSyllable` profile includes ten parameters, five for detection step 3 and five for step 4. The step 4 parameters direct the actual search for target syllables in the spectrogram.
 ```yml
 Profiles:  
     BoobookSyllable: !ForwardTrackParameters
@@ -295,14 +296,17 @@ Profiles:
             - 12.0
 ```
 
-> _ComponentName_ and _SpeciesName_ are user defined words that describe the syllable/event defined in the Profile. _MinHertz_ and _MaxHertz_ define the frequency band in which a search is to be made for the target event. Note that these parameters define the bounds of the search band _not_ the bounds of the event itself. _MinDuration_ and _MaxDuration_ set the minimum and maximum time duration (in seconds) of the target event. At the present time these are hard bounds. 
+> _MinHertz_ and _MaxHertz_ define the frequency band in which a search is to be made for the target event. Note that these parameters define the bounds of the search band _not_ the bounds of the event itself. _MinDuration_ and _MaxDuration_ set the minimum and maximum time duration (in seconds) of the target event. At the present time these are hard bounds. 
 
 The above parameters are common to all target events. _Oscillations_ and _harmonics_, being more complex events, have additional parameters as described below. 
 
-> **_Oscillation Events_**: The algorithm to find oscillation events uses a discrete cosine transform or *DCT*. Setting the correct DCT for the target syllable requires additional parameters. Here is a section of a config file for the flying fox. This profile detects the rythmic sound of wing beats as a flying fox takes off or comes in to land. 
+**_Oscillation Events_**
+
+The algorithm to find oscillation events uses a _discrete cosine transform_ or *DCT*. Setting the correct DCT for the target syllable requires additional parameters. Here is the `Profiles` declaration in the config file for the _flying fox_. It contains two profiles, the first for a vocalisastion and the second to detect the rythmic sound of wing beats as a flying fox takes off or comes in to land. 
 ```yml
 Profiles:
     Territorial: !BlobParameters
+        ComponentName: TerritorialScreech
         MinHertz: 800          
         MaxHertz: 8000
         MinDuration: 0.15
@@ -310,6 +314,7 @@ Profiles:
         DecibelThresholds:
             - 9.0
     Wingbeats: !OscillationParameters
+        ComponentName: Wingbeats
         # The search band
         MinHertz: 200          
         MaxHertz: 2000
@@ -329,13 +334,16 @@ Profiles:
         # Event threshold - use this to determine FP/FN trade-off.
         EventThreshold: 0.5
 ```
-> Note the first five parameters are common to all events - they determine the search band, the allowable event duration and the decibel threshold. The remaining five parameters determine the DCT search for oscillations. _MinOscilFreq_ and _MaxOscilFreq_ specify the oscillation bounds in beats or oscillations per second. These values were established by measuring a sample of flying fox wingbeats. The next two parameters, the DCT duration in seconds and the DCT threshold can be tricky to establish but are critical for success. The DCT is computationally expensive but for accuracy it needs to span at least two or three oscillations. In this case a duration of 0.5 seconds is just enough to span at least two oscillations. The output from a DCT operation is a set of coefficients (taking values in [0, 1]), the largest of which indicates the likely oscillation rate. _DctThreshold_ sets the minimum value to be an acceptable value. Lowering _DctThreshold_ increases the likelihood that random noise will be accepted as an oscillation; increasing _DctThreshold_ increases the likelihood that a target oscillation is rejected. The optimum values for    
-_DctDuration_ and _DctThreshold_ interact. It requires some experimentation to find the best values for your target syllable. Experiment with _DctDuration_ first and the _DctThreshold_.
+> Note the first six _wingbeat_ parameters are common to all events - parameters 2-6 determine the search band, the allowable event duration and the decibel threshold. The remaining five parameters determine the search for oscillations. _MinOscilFreq_ and _MaxOscilFreq_ specify the oscillation bounds in beats or oscillations per second. These values were established by measuring a sample of flying fox wingbeats. The next two parameters, the DCT duration in seconds and the DCT threshold can be tricky to establish but are critical for success. The DCT is computationally expensive but for accuracy it needs to span at least two or three oscillations. In this case a duration of 0.5 seconds is just enough to span at least two oscillations. The output from a DCT operation is an array of coefficients (taking values in [0, 1]). The index into the array is the oscillation rate and the value at that index is the amplitude. The index with largest amplitude indicates the likely oscillation rate, but _DctThreshold_ sets the minimum acceptable amplitude value. Lowering _DctThreshold_ increases the likelihood that random noise will be accepted as a true oscillation; increasing _DctThreshold_ increases the likelihood that a target oscillation is rejected.
+
+> The optimum values for _DctDuration_ and _DctThreshold_ interact. It requires some experimentation to find the best values for your target syllable. Experiment with _DctDuration_ first while keeping the _DctThreshold_ value low. Once you have a reliable value for _DctDuration_, gradually increase the value for _DctThreshold_.
  
 **_TODO_** include an image of the DCT applied to oscillations and harmonics 
 
 
-**_Harmonic Events_**: The algorithm to find harmonic events can be visualised as similar to the oscillations algorithm, but rotated 90 degrees. It uses a DCT oriented in a vertical direction and requires similar additional parameters.
+**_Harmonic Events_**
+
+The algorithm to find harmonic events can be visualised as similar to the oscillations algorithm, but rotated by 90 degrees. It uses a DCT oriented in a vertical direction and requires similar additional parameters.
 
 ```yml
 Profiles:
@@ -345,27 +353,25 @@ Profiles:
         # The search band
         MinHertz: 500          
         MaxHertz: 5000
-        # Min & max duration for sequence of wingbeats.
+        # Min & max duration for a set of harmonics.
         MinDuration: 0.2
         MaxDuration: 1.0        
         DecibelThreshold: 2.0
-
-        #  Harmonics
-        minFormantGap: 400        
-        maxFormantGap: 1200
-    
-        # DCT duration in seconds
-        DctDuration: 0.5 **_TODO_** CHECK THIS
-        # minimum acceptable value of a DCT coefficient
+        #  Min & max Hertz gap between harmonics
+        MinFormantGap: 400        
+        MaxFormantGap: 1200
         DctThreshold: 0.15         
         # Event threshold - use this to determine FP/FN trade-off.
         EventThreshold: 0.5
 ```
+> Note there are only two parameters that are specific to _Harmonics_,  _MinFormantGap_ and _MaxFormantGap_. These specify the minimum and maximum allowed gap (measured in Hertz) between adjacent formants/harmonics. Note that for these purposes the terms _harmonic_ and _formant_ are equivalent. The DCT is performed over all bins in the search band.
+
+> Once again, the output from a DCT operation is an array of coefficients (taking values in [0, 1]). The index into the array is the gap between formants and the value at that index is the formant amplitude. The index with largest amplitude indicates the likely formant gap, but _DctThreshold_ sets the minimum acceptable amplitude value. Lowering _DctThreshold_ increases the likelihood that random noise will be accepted as a true set of formants; increasing _DctThreshold_ increases the likelihood that a target set of stacked harmonics is rejected.
+
+
 
 ### Step 5. Combining syllables into calls
-The parameters for the two *post-processing* steps. steps 5 and 6, are all indented and come under the keyword `PostProcessing`.
-
-> IMPORTANT NOTE: These post-processing steps are applied to the calls collected from all *profiles* in the list of profiles. 
+Detection step 5 is the first of two *post-processing* steps. They both come under the keyword `PostProcessing`. Note that these post-processing steps are performed on all 'discovered" acoustic events collectively, i.e. all those obtained from all the *profiles* in the list of profiles. 
 
 **Step 5.1.** Combine overlapping events. (Note the indentation)
  ```yml
@@ -373,13 +379,14 @@ PostProcessing:
     CombineOverlappingEvents: true
 ```
 >This is typically set *true*, but it depends on the target call. You may wish to set this true for two reasons:
-> 1. the target call is composed of two or more syllables that you want to join as one event.
->  2. you wish to isolate certain kinds of multi-syllable calls for later removal.
+- the target call is composed of two or more overlapping syllables that you want to join as one event.
+- whistle events often require this step to unite part-whistle detections as one event.
 
 
 **Step 5.2.** Combine possible syllable sequences
- (Note the key-word `SyllableSequence` indented under the `PostProcessing` key word and the indentation of parameters under the `SyllableSequence` key-word.)
+ (Note the levels of indentation)
  ```yml
+PostProcessing:
     SyllableSequence:
         CombinePossibleSyllableSequence: true
         SyllableStartDifference: 0.6
@@ -389,9 +396,9 @@ PostProcessing:
         ExpectedPeriod: 0.4
 ```	
 
-> Set _CombinePossibleSyllableSequence_ true where you want to combine possible syllable sequences. _SyllableStartDifference_ and _SyllableHertzGap_ define the latitude to the combining of events into sequences.  _SyllableStartDifference_ defines the maximum allowed time difference (in seconds) between the starts of two consecutive events. _SyllableHertzGap_ defines the maximum allowed frequency difference (in Hertz) between the minimum frequencies of two consecutive events.
+> Set _CombinePossibleSyllableSequence_ true where you want to combine possible syllable sequences. A typical example is a sequence of chirps in a honeyeater call. _SyllableStartDifference_ and _SyllableHertzGap_ set the allowed latitude when combining events into sequences.  _SyllableStartDifference_ sets the maximum allowed time difference (in seconds) between the starts of two events. _SyllableHertzGap_ sets the maximum allowed frequency difference (in Hertz) between the minimum frequencies of two events.
 
-> Once you have combined possible sequences, set _FilterSyllableSequence_ true if you want to filter (remove) sequences that do not fall within the constraints defined by _SyllableMaxCount_ and _ExpectedPeriod_. _SyllableMaxCount_ sets an upper limit of the number of events that are combined to form a sequence and _ExpectedPeriod_ sets a limit on the average period (in seconds) of the combined events.
+> Once you have combined possible sequences, you may wish to remove sequences that do not satisfy the parameters for your target call. Set _FilterSyllableSequence_ true if you want to filter (remove) sequences that do not fall within the constraints defined by _SyllableMaxCount_ and _ExpectedPeriod_. _SyllableMaxCount_ sets an upper limit of the number of events that are combined to form a sequence and _ExpectedPeriod_ sets a limit on the average period (in seconds) of the combined events.
 
 > **_TODO_** a description of how to set _ExpectedPeriod_ and how it works 
 
@@ -402,31 +409,34 @@ PostProcessing:
 **Step 6.1.** Remove events whose duration lies outside an expected range.
 
 ```yml
+PostProcessing:
     Duration:
         ExpectedDuration: 0.14
         DurationStandardDeviation: 0.01
 ```
-> Note indentation of the key-word `Duration`. This filter removes events whose duration lies outside three stnadard devisations (SDs) of an expected value. _ExpectedDuration_ defines the _expected_ or _average_ duration (in seconds) for the target events and _DurationStandardDeviation_ defines one SD of the value. Assuming the duration is normally distributed, three SDs sets hard upper and lower duration bounds that includes 99.7% of instances. 
+> Note indentation of the key-word `Duration`. This filter removes events whose duration lies outside three standard deviations (SDs) of an expected value. _ExpectedDuration_ defines the _expected_ or _average_ duration (in seconds) for the target events and _DurationStandardDeviation_ defines _one_ SD of the assumed distribution. Assuming the duration is normally distributed, three SDs sets hard upper and lower duration bounds that includes 99.7% of instances. The filtering algorithm calculates these hard bounds and removes acoustic events that fall outside the bounds.
 
 **Step 6.2.** Remove events whose bandwidth is too small or large.
         Remove events whose bandwidth lies outside 3 SDs of an expected value.
 ```yml
+PostProcessing:
     Bandwidth:
         ExpectedBandwidth: 280
         BandwidthStandardDeviation: 40
 ```
-> Note indentation of the key-word `Bandwidth`. This filter removes events whose bandwidth lies outside three stnadard devisations (SDs) of an expected value. _ExpectedBandwidth_ defines the _expected_ or _average_ bandwidth (in Hertz) for the target events and _BandwidthStandardDeviation_ defines one SD of the value. Assuming the bandwidth is normally distributed, three SDs sets hard upper and lower bandwidth bounds that includes 99.7% of instances. 
+> Note indentation of the key-word `Bandwidth`. This filter removes events whose bandwidth lies outside three standard deviations (SDs) of an expected value. _ExpectedBandwidth_ defines the _expected_ or _average_ bandwidth (in Hertz) for the target events and _BandwidthStandardDeviation_ defines one SD of the assumed distribution. Assuming the bandwidth is normally distributed, three SDs sets hard upper and lower bandwidth bounds that includes 99.7% of instances. The filtering algorithm calculates these hard bounds and removes acoustic events that fall outside the bounds.
 
 **Step 6.3.** Remove events that have excessive noise in their side-bands.
 ```yml
+PostProcessing:
     SidebandActivity:
         LowerHertzBuffer: 150
         UpperHertzBuffer: 400
         MaxAverageSidebandDecibels: 3.0
 ```
-> Note indentation of the key-word `SidebandActivity`. This filter removes events that have acoustic activity (measured in Decibels) in their sidebands (i.e. upper and lower buffer zones) exceeding the specified amount. The purpose of this filter is to remove _broadband_ events that encompass the frequency band of interest and its sidebands for the appropriate duration but are not the target event. This is a common occurence, so this filter can be very useful. _LowerHertzBuffer_ and _UpperHertzBuffer_ define the bandwidth of the target event sidebands. (These can be also be understood as buffer zones above and below the target event.)
+> Note indentation of the key-word `SidebandActivity`. This filter removes events that have acoustic activity in their sidebands (i.e. upper and lower buffer zones) exceeding the specified amount. The purpose of this filter is to remove _broadband_ events that encompass the frequency band of interest _and_ its sidebands for the event's duration _but are not the target event_. This is a common occurence, so this filter can be very useful. _LowerHertzBuffer_ and _UpperHertzBuffer_ define the bandwidth of the target sidebands. (These can be also be understood as buffer zones above and below the target event, hence the names assigned to the parameters.)
 
->  _MaxAverageSidebandDecibels_ is used in two ways: 1. it limits the average amount of acoustic energy in all the spectrogram cells included in the sidebands: and 2. it limits the amount of acoustic energy in any time frame or ferquency bin within the sidebands.
+>  _MaxAverageSidebandDecibels_ is used in two ways: 1. it sets an upper limit on the acoustic energy in the sidebands (measured in Decibels and averaged over all spectorgram cells in the sidebands); and 2. sets an upper limit on the total acoustic energy in any one timeframe or frequency bin within the sidebands.
 
 ### Step 7. Saving Results
 The parameters in this final part of the config file determine what results are saved to file. They do _not_ come under the `PostProcessing` keyword and therefore they are _not_ indented.
@@ -438,16 +448,16 @@ SaveIntermediateCsvFiles: False
 DisplayCsvImage: False
 ```
 
-> There are three options for _SaveSonogramImages_:  [False/Never | True/Always | WhenEventsDetected] (They are case-sensitive.)
+> There are three options for _SaveSonogramImages_:  [False/Never | True/Always | WhenEventsDetected] (These are case-sensitive.)
 *True* is useful when debugging but *WhenEventsDetected* is required for operational use.
 
 > There are three options for _SaveIntermediateWavFiles_ (also case-sensitive): [False/Never | True/Always | WhenEventsDetected]. 
   Typically you would save intermediate data files only for debugging, otherwise your output will be excessive.
 
 > There are three options for _SaveIntermediateCsvFiles_ (also case-sensitive): [False/Never | True/Always | WhenEventsDetected]. 
-  Typically this be set false, otherwise your output will be excessive.
+  Typically this should be set false, otherwise your output will be excessive.
 
-> The final option (_DisplayCsvImage_) is obsolete - ensure it remains set to False
+> The final parameter (_DisplayCsvImage_) is obsolete - ensure it remains set to False
 
 The last parameter in the config file makes a reference to a second config file:
 ```yml
