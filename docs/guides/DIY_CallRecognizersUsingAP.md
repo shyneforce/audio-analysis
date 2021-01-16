@@ -80,7 +80,7 @@ These ideas are summarised in the following table:
 ## 2. Calls, syllables, harmonics
 The algorithmic approach of **DIY Call Recognizer** makes particular assumptions about animals calls and how they are structured. A *call* is taken to be any sound of animal origin (whether for communication purposes or not) and includes bird songs/calls, animal vocalisations of any kind, the stridulation of insects, the wingbeats of birds and bats and the various sounds produced by acquatic animals. Calls typically have temporal and spectral structure. For example they may consist of a temporal sequence of two or more *syllables* (with "gaps" in between) or a set of simultaneous *harmonics* or *formants*. (The distinction between harmonics and formants does not concern us here.)
 
-**DIY Call Recognizer** attempts to recognizer calls in a noise-reduced spectrogram, which is processed as a matrix of real values but visualised as a grey-scale image. Each row of pixels is a frqeuency bin and each column of pixels is a time-frame. The value in each spectrogram/matrix cell (represented visually by an image pixel) is the acoustic intensity in decibels with respect to the background noise baseline. Note that the decibel values in a noise-reduced spectrogram are always positive.
+**DIY Call Recognizer** attempts to recognize calls in a noise-reduced spectrogram, which is processed as a matrix of real values but visualised as a grey-scale image. Each row of pixels is a frqeuency bin and each column of pixels is a time-frame. The value in each spectrogram/matrix cell (represented visually by one image pixel) is the acoustic intensity in decibels with respect to the background noise baseline. Note that the decibel values in a noise-reduced spectrogram are always positive.
 
 .
 
@@ -119,20 +119,19 @@ Harmonics are the same/similar shaped *whistle* or *chirp* repeated simultaneous
 
 ## 4. Detecting acoustic events
 **DIY Call Recognizer** detects or recognizes target calls in an audio recording using a sequence of seven steps: 
-1. Audio resampling
-2. Audio segmentation
+1. Audio segmentation
+2. Audio resampling
 3. Spectrogram preparation
 4. Call syllable detection
 5. Combining syllable events into calls
 6. Syllable/call filtering
 7. Saving Results
 
-**_TODO_** need to check with Anthony if steps 1 and 2 are in correct order.
-
-It helps to group these detection steps into three parts:
+It helps to group these detection steps into four parts:
 - Steps 1 and 2: _Pre-processing_ steps to prepare the recording for subsequent analysis.
 - Steps 3 and 4: _Processing_ steps to identify target syllables as _"generic"_ acoustic events. 
-- Steps 5 to 7: _Post-processing_ steps which simplify the output from step 4 by combining related acoustic events, filtering events to remove false-positives and finally saving those events which remain. 
+- Steps 5 and 6: _Post-processing_ steps which simplify the output from step 4 by combining related acoustic events and filtering events to remove false-positives. 
+- Step 7: The final step is to save those events which remain.
 
 To execute these seven detection steps correctly, you must enter suitable _parameter values_ into a _configuration file_. 
 
@@ -144,9 +143,10 @@ To execute these seven detection steps correctly, you must enter suitable _param
 ### The structure of the config file name
 **DIY Call Recognizer** is a command line tool. It requires a _configuration file_ (henceforth, _config_ file) in order to find calls of interest in a recording. The name of the config file is included as a command line argument. `APexe` reads the file containing a list of _parameters_ and then executes the detection steps accordingly. The command line will be described in a subsequent section. 
 
-> NOTE: The config filename must have the correct structure in order to be recognized by `APexe`. For example, given a config file with the name `Ecosounds.NinoxBoobook.yml`:
-> - `Ecosounds` tells `APexe` that this is a call recognition task.
-> - `NinoxBoobook` tells `APexe` the scientific name of the target species, in this case the Boobook owl. (Note there must be no spaces in the file name.)
+> NOTE: The config filename must have the correct structure in order to be recognized by `APexe`. For example, given a config file with the name `AuthorId.GenericRecognizer.NinoxBoobook.yml`:
+> - `AuthorId` is simply to keep track of the origins of the config.
+> - `GenericRecognizer` tells `APexe` that this is a call recognition task and to parse the config file accordingly. Note this must be in second place in the file name.
+> - `NinoxBoobook` (the Boobook owl) is an optional species name. `APexe` does not read/use this info but note that there must be no spaces in the file name.
 > - `.yml` informs `APexe` what syntax to expect, in this case YAML.
 
 **_TODO_** need to check with Anthony re changes to structure of the config file name.
@@ -165,10 +165,10 @@ Note that the parameter name `SampleRate` is followed by a colon, a space and th
 
 In order to be read correctly, the 20 or more parameters in a config file must be grouped and nested correctly. They are typically ordered according to the seven recognition steps above, that is:
  
-- Parameters that determine the pre-processing (detection steps 1 and 2)
-- Parameters that determine which acoustic events are the target (detection steps 3 and 4)
-- Parameters that determine post-processing of the retrieved acoustic events (steps 5, 6, 7)
-
+- Parameters that determine pre-processing (detection steps 1 and 2)
+- Parameters that describe the target syllables (detection steps 3 and 4)
+- Parameters that determine post-processing of the retrieved acoustic events (steps 5 and 6)
+- Parameters that determine saving of results (step 7)
 
 ### Profiles
 
@@ -220,31 +220,32 @@ In the above example the line `BoobookSyllable1: !ForwardTrackParameters` is to 
 
 
  ### An additional note about acoustic events
-> All seven "generic" acoustic events are characterised by common properties, such as their temporal duration, bandwidth, decibel intensity. In fact, every acoustic event is bounded by an _implicit_ rectangle or marquee whose height represents the bandwidth of the event and whose width represents the duration of the event. Even a _chirp_ or _whip_ which consists only of a single sloping *spectral track*, is enclosed by a rectangle, two of whose vertices sit at the start and end of the track.
+> All seven "generic" acoustic events are characterised by common properties, such as their minumum and maximum temporal duration, bandwidth, decibel intensity. In fact, every acoustic event is bounded by an _implicit_ rectangle or marquee whose height represents the bandwidth of the event and whose width represents the duration of the event. Even a _chirp_ or _whip_ which consists only of a single sloping *spectral track*, is enclosed by a rectangle, two of whose vertices sit at the start and end of the track.
 
 
 .
 
 ## 6. Parameter names and values
 
-This section describes how to set the parameters (using correct yaml syntax) for each of the seven call-detection steps. We use, as a concrete example, the config file for the Boobook Owl, *Ninox boobook*.
+This section describes how to set the parameters values (using correct yaml syntax) for each of the seven call-detection steps. We use, as a concrete example, the config file for the Boobook Owl, *Ninox boobook*.
 
-The `YAML` lines are followed by an explanation of the parameters.
+The `YAML` lines are followed by an explanation of each parameter.
 
-### Step 1. Audio resampling
-Specifies the sample rate at which the recording will be processed.   
-```yml
-ResampleRate: 22050
-```
-> If this parameter is not specified in the config file, the default is to _resample_ the recording (up or down) to 22050 samples per second. This has the effect of limiting the maximum frequency in the recording (the Nyquist) to 11025 Hertz.  *ResampleRate* must be twice the desired Nyquist. Specify the resample rate that gives the best result for your target call. If the target call is in a low frequency band (e.g. < 2kHz), then lower the resample rate to somewhat more than twice the maximum frequency of interest. This will reduce processing time and produce better focused spectrograms. If you down-sample, you will lose high frequency content. If you up-sample, there will be undefined "noise" in spectrograms above the original Nyquist.
-
-### Step 2. Audio segmentation
+### Step 1. Audio segmentation
 Analysis of long recordings is made tractable by breaking them into shorter (typically 60-second) segments.
 ```yml
 SegmentDuration: 60    
 SegmentOverlap: 0
 ```    
-> The default values are 60 and 0 seconds respectively and these seldom need to be changed. You may wish to work at finer resolution by changing SegmentDuration to 20 or 30 seconds. If your target call is comparitively long (such as a koala bellow, e.g. greater than 10 - 15 seconds), you could increase SegmentDuration to 70 seconds and increase SegmentOverlap to 10 seconds. This reduces the probability that a call will be split across segments. It also maintains a 60-second interval between segment-starts which helps to identify where you are in a recording.
+> The default values are 60 and 0 seconds respectively and these seldom need to be changed. You may wish to work at finer resolution by reducing _SegmentDuration_ to 20 or 30 seconds. If your target call is comparitively long (such as a koala bellow, e.g. greater than 10 - 15 seconds), you could 
+increase _SegmentOverlap_ to 10 seconds. This actually increases the segment duration to 70 seconds (60+10) so reducing the probability that a call will be split across segments. It also maintains a 60-second interval between segment-starts, which helps to identify where you are in a recording.
+
+### Step 2. Audio resampling
+Specifies the sample rate at which the recording will be processed.   
+```yml
+ResampleRate: 22050
+```
+> If this parameter is not specified in the config file, the default is to _resample_ each recording segment (up or down) to 22050 samples per second. This has the effect of limiting the maximum frequency (the Nyquist) to 11025 Hertz.  *ResampleRate* must be twice the desired Nyquist. Specify the resample rate that gives the best result for your target call. If the target call is in a low frequency band (e.g. < 2kHz), then lower the resample rate to somewhat more than twice the maximum frequency of interest. This will reduce processing time and produce better focused spectrograms. If you down-sample, you will lose high frequency content. If you up-sample, there will be undefined "noise" in spectrograms above the original Nyquist.
 
 ### Step 3. Spectrogram preparation
 
@@ -468,15 +469,13 @@ This parameter is irrelevant to call recognizers and can be ignored, but it must
 
 .
 
-.
-
 
 ## 7. An efficient strategy to tune parameters
 
-Tuning parameter values can be frustrating and time-consuming if a logical sequence is not followed. The idea is to tune parameters in the sequence in which they appear in the config file, keeping all "downstream" parameters as "open" and "unrestrictive" as possible. Here we summarize a tuning strategy in five steps.
+Tuning parameter values can be frustrating and time-consuming if a logical sequence is not followed. The idea is to tune parameters in the sequence in which they appear in the config file, keeping all "downstream" parameters as "open" or "unrestrictive" as possible. Here we summarize a tuning strategy in five steps.
 
 **Step 1.**
-Turn off all post-processing steps. That is, turn all post-processing booleans to false OR comment out all post-processing keys in the config file. 
+Turn off all post-processing steps. That is, set all post-processing booleans to false OR comment out all post-processing keywords in the config file. 
 
 **Step 2.**
     Initially set all profile parameters so as to catch the maximum possible number of target calls/syllables.
@@ -507,12 +506,9 @@ At this point you should have "captured" all the target calls/syllables (i.e. th
 
 At the end of this process, you are likely to have a mixture of true-positives, false-postives and false-negatives. The goal is to set the parameter values so that the combined FP+FN total is minimised. You should adjust parameter values so that the final FN/FP ratio reflects the relative costs of FN and FP errors. For example, lowering a decibel threshold may pick up more TPs but almost certainly at the cost of more FPs. 
 
-**NOTE:** A working DIY Call Recognizer can be built with just one example or training call. A machine learning algorithm requires typically 100 true and false examples. The price that you (the ecologist) pays for this simplicity is the need to exercise some of the "intelligence" that would be exercised by the machine learning algorithm. That is, you must select calls and set parameter values that reflect the variability of the target calls and that also reflect the relative costs of FN and FP errors.
+**NOTE:** A working DIY Call Recognizer can be built with just one example or training call. A machine learning algorithm requires typically 100 true and false examples. The price that you (the ecologist) pays for this simplicity is the need to exercise some of the "intelligence" that would otherwise be exercised by the machine learning algorithm. That is, you must select calls and set parameter values that reflect the variability of the target calls and the relative costs of FN and FP errors.
 
 .
-
-.
-
 
 
 ## 8. Eight steps to building a DIY Call Recognizer
@@ -521,9 +517,8 @@ We described above the various steps required to tune the parameter values in a 
 
 > **Step 1.** Select one or more one-minute recordings that contain typical examples of your target call. It is also desirable that the background acoustic events in your chosen recordings are representative of the intended operational environment. If this is difficult, one trick to try is to play examples of your target call through a loud speaker in a location that is similar to your intended operational environment. You can then record these calls using your intended Acoustic Recording Unit (ARU).
 
-> **Step 2.** Assign parameter values into your config.yml file for that species. A suggested file name would be: `DIYRecognizerConfig.SpeciesName.yml`.
+> **Step 2.** Assign parameter values into your config.yml file for the target call(s).
 
-**__TODO__** Check what names are currently valid for a recognizer config file.
 
 > **Step 3.** Run the recognizer, using the command line described in the next section.
 
@@ -531,13 +526,12 @@ We described above the various steps required to tune the parameter values in a 
 
 > **Step 5.** Tune or refine parameter values in order to increase the detection accuracy.
 
-> **Step 6.** Repeat stages 3, 4 and 5 until you appear to have achieved the best possible accuracy. In order to minimise the number of iterations of stages 3 to 5, it is best to tune the configuration parameters in the sequence described in the previous section.
+> **Step 6.** Repeat steps 3, 4 and 5 until you appear to have achieved the best possible accuracy. In order to minimise the number of iterations of stages 3 to 5, it is best to tune the configuration parameters in the sequence described in the previous section.
 
 > **Step 7.** At this point you should have a recognizer that performs "reasonably well" on your training examples. The next step is to test your recognizer on one or a few examples that it has not seen before. That is, repeat steps 3, 4, 5 and 6 adding in a new example each time as they become available. It is also useful at this stage to accumulate a set of recordings that do *not* contain the target call. See Section 10 for more suggestions on building datasets. 
 
 > **Step 8:** At some point you are ready to use your recognizer on recordings obtained from the operational environment.
 
-.
 
 .
 
@@ -549,15 +543,16 @@ We described above the various steps required to tune the parameter values in a 
 
 In this section we only describe the command line for the _call recognizer_ action where:
 - action = "audio2csv".
-- arguments = the paths to an audio file, a config file and an output directory. 
+- arguments = three file paths, to an audio file, a config file and an output directory. 
 - options = short strings beginning with a `-` or `--` that influence `APexe`'s execution.
 
 Refer to other manuals [here](https://github.com/QutEcoacoustics/audio-analysis/blob/master/README.md) for a more complete description of `APexe`'s functionality. Note that the three file arguments must be in the order shown, that is: audio file, config file, output directory.
 
-**Options:** There are two frequently useful options: 
+**Options:** There are three frequently useful options:
 
-    1. The debug/no-debug options: Use -d for debug or -n for no debugging.
-    2. The verbosity options: --quiet, -v, -vv, -vvv for different levels of verbosity.
+    1. The debug/no-debug options: Use "-d" for debug or "-n" for no debugging.
+    2. The verbosity options: "--quiet", "-v", "-vv", "-vvv" for different levels of verbosity.
+    3. The analysis-identifier option: Use "-a" or "--analysis-identifier" followed by the _analysis type_, which in the case of DIY call recognizers is "NameId.GenericRecognizer". This is a useful addition to the command line because it informs `APexe` that this as a call recognition task in case the config file is not named correctly.  
     
 For other possible options, see the above referenced manual.
 
@@ -571,7 +566,7 @@ In powershell, the code to prepare and execute a commandline might look like thi
 
     # prepare command line
     $command = " .\AnalysisPrograms.exe audio2csv $audioFile $configFile 
-                        $outputDirectory -n --quiet"
+                    $outputDirectory -a NameId.GenericRecognizer -n --quiet"
 
     # EXECUTE the command
     Invoke-Expression $command
@@ -579,9 +574,6 @@ In powershell, the code to prepare and execute a commandline might look like thi
 In the above command line, the options are no-debugging and minimal logging.
 
 .
-
-.
-
 
 
 ## 10. Building a larger data set
