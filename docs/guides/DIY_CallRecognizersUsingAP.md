@@ -30,9 +30,9 @@ NOTE:
 
 ## 1. Why bother with a DIY call recognizer?
 
-There are three levels of sophistication in call recognizers:
+There are three levels of sophistication in automated call recognizers:
 - The simplist is the handcrafted template.
-- More powerful is a machine learned model.
+- More powerful is a _machine learned_ model.
 - The current cutting edge of call recognizers is *deep-learning* using a convolutional neural network.
 
 A comparison of these recognizer types is shown in the following table and explained further in the subsequent paragraph.
@@ -47,16 +47,16 @@ A comparison of these recognizer types is shown in the following table and expla
 ||||
 
 
-Hand-crafted, *rule-based* templates can be built using just one or a few examples of the target call. But like any rule-based *AI* system, they are *brittle*, that is, they break easily if the target call falls even slightly outside the bounds of the rules. A supervised machine-learned model, for example an SVM or Random Forest, is far more resilient to slight changes in the range of the target call but they require many more training examples, on the order of 100 training examples. Finally, the convolutional neural network (CNN) is the most powerful learning machine available today (2020) but this power is achieved only by supplying thousands of examples of the each target call.
+Hand-crafted, *rule-based* templates can be built using just one or a few examples of the target call. But like any rule-based *AI* system, they are *brittle*, that is, they break easily if the target call falls even slightly outside the bounds of the rules. A supervised machine-learning model, for example an SVM or Random Forest, is far more resilient to slight changes in the range of the target call but they require many more training examples, on the order of 100 training examples. Finally, the convolutional neural network (CNN) is the most powerful learning machine available today (2021) but this power is achieved only by supplying thousands of examples of the each target call.
 
- **Note**: The following two rules apply to the preparation of training/test datsets, regardless of the recognizer type.
+> **Note**: The following two rules apply to the preparation of training/test datasets, regardless of the recognizer type.
 
- - **Rule 1.** Rubbush in => rubbish out!! That is, think about your chosen training/test examples carefully.
+> - **Rule 1.** Rubbush in => rubbish out!! That is, think carefully about your chosen training/test examples.
 
--  **Rule 2.** Training and test sets should be representative (in some loose statistical sense) of the intended operational environment.
+> -  **Rule 2.** Training and test sets should be representative (in some loose statistical sense) of the intended operational environment.
 
 
-To summarise (and at the risk of over-simplification), a hand-crafted template has low cost and low benefit; a machine-learned model has medium cost and medium benefit, while a deep-learned model has high cost and high benefit. The cost/benefit ratio in each case is similar but here is the catch - the cost must be paid before you get the benefit! Furthermore, in a typical ecological study, a bird species is of interest precisely because it is threatened or cryptic. When not many calls are available, the more sophisticated approaches become untenable. Hence there is a place for hand-crafted templates in call recognition.
+To summarise (and at the risk of over-simplification), a hand-crafted template has low cost and low benefit; a machine-learned model has medium cost and medium benefit, while a deep-learned model has high cost and high benefit. The cost/benefit ratio in each case is similar but here is the catch - the cost must be paid _before_ you get the benefit! Furthermore, in a typical ecological study, a bird species is of interest precisely because it is threatened or cryptic. When not many calls are available, the more sophisticated approaches become untenable. Hence there is a place for hand-crafted templates in call recognition.
 
 These ideas are summarised in the following table:
 | Type of Recognizer | Cost | Benefit | Cost/benefit ratio | The catch !|
@@ -68,11 +68,11 @@ These ideas are summarised in the following table:
 
 
 
-**The advantages of a hand-crafted DIY call recognizer:**
+**To summarise, the advantages of a hand-crafted DIY call recognizer are:**
 1. You can do it yourself!
 2. You can start with just one or two calls.
 3. Allows you to collect a larger dataset for machine learning purposes.
-4. Exposes the variability of the target call. 
+4. Exposes the variability of the target call as you go. 
 
 
 .
@@ -104,7 +104,7 @@ A *whip* is like a *chirp* except that the frequency modulation can be extremely
 ### 3.5. Click
 The *click* appears as a single vertical line in a spectrogram and sounds, like the name suggests, as a very brief click. In practice, depending on spectrogram configuration settings, a *click* may occupy two or more adjacent time-frames.
 
-Note that each of the above five acoustic events are "simple" or "singular" events. The remaining two kinds of acoustic event are said to be composite, that is, they are composed of more than one acoustic event but the detection algorithm is designed to pick them up as singular events.
+Note that each of the above five acoustic events are "simple" events. The remaining two kinds of acoustic event are said to be composite, that is, they are composed of more than one acoustic event but the detection algorithm is designed to pick them up as a single event.
 
 ### 3.6. Oscillations
 An oscillation is the same (or nearly the same) syllable (typically whips or clicks) repeated at a fixed periodicity over several to many time-frames.
@@ -112,7 +112,8 @@ An oscillation is the same (or nearly the same) syllable (typically whips or cli
 ### 3.7. Harmonics
 Harmonics are the same/similar shaped *whistle* or *chirp* repeated simultaneously at multiple intervals of frequency. Typically, the frequency intervals are similar as one ascends the stack of harmonics.
 
-![Seven Kinds Of Acoustic Event](./Images/SevenKindsOfAcousticEvent.png)
+**Figure. The seven kinds of generic acoustic event**
+![Seven Kinds Of Acoustic Event](./Images/SevenKindsAcousticEvent.jpg)
 
 .
 
@@ -157,10 +158,10 @@ We highly recommend using Notepad++ or Visual Studio Code to edit your YAML conf
 ### Parameters
 Config files contain a list of parameters, each of which is written as a name-value pair, for example:
 ```yml
-SampleRate: 22050
+ResampleRate: 22050
 ```
 
-Note that the parameter name `SampleRate` is followed by a colon, a space and then a value for the parameter. In this manual we will use typical or default values as examples. Obviously, the values must be "tuned" to the target syllables. 
+Note that the parameter name `ResampleRate` is followed by a colon, a space and then a value for the parameter. In this manual we will use typical or default values as examples. Obviously, the values must be "tuned" to the target syllables. 
 
 
 In order to be read correctly, the 20 or more parameters in a config file must be grouped and nested correctly. They are typically ordered according to the seven recognition steps above, that is:
@@ -247,6 +248,9 @@ ResampleRate: 22050
 ```
 > If this parameter is not specified in the config file, the default is to _resample_ each recording segment (up or down) to 22050 samples per second. This has the effect of limiting the maximum frequency (the Nyquist) to 11025 Hertz.  *ResampleRate* must be twice the desired Nyquist. Specify the resample rate that gives the best result for your target call. If the target call is in a low frequency band (e.g. < 2kHz), then lower the resample rate to somewhat more than twice the maximum frequency of interest. This will reduce processing time and produce better focused spectrograms. If you down-sample, you will lose high frequency content. If you up-sample, there will be undefined "noise" in spectrograms above the original Nyquist.
 
+**Figure. Parameters for the first three detection steps**
+![First Three Detection Steps](./Images/ParametersForSteps1-3.png)
+
 ### Step 3. Spectrogram preparation
 
 As noted above, the parameters for detection steps 3 and 4 are grouped into _profiles_ and multiple _profiles_ are nested under the keyword `Profiles`. The example below declares just one profile under the kepword `Profiles`. Its name is `BoobookSyllable` which is declared as type `ForwardTrackParameters` (a chirp). Indented below the profile declaration are its first six parameters.
@@ -269,8 +273,6 @@ Profiles:
 
 > The "Bg" in *BgNoiseThreshold* means *background*. This parameter determines the degree of severity of noise removal from the spectrogram. The units are decibels. Zero sets the least severe noise removal. It is the safest default value and probably does not need to be changed. Increasing the value to say 3-4 decibels increases the likelihood that you will lose some important components of your target calls. For more on the noise removal algorithm used by `APexe` see [Towsey, Michael W. (2013) Noise removal from wave-forms and spectrograms derived from natural recordings of the environment.](https://eprints.qut.edu.au/61399/). 
 
-
-![Templates have parameters](./Images/TemplatesHaveParameters.png)
 
 ### Step 4. Call syllable detection
 
@@ -298,6 +300,10 @@ Profiles:
 ```
 
 > _MinHertz_ and _MaxHertz_ define the frequency band in which a search is to be made for the target event. Note that these parameters define the bounds of the search band _not_ the bounds of the event itself. _MinDuration_ and _MaxDuration_ set the minimum and maximum time duration (in seconds) of the target event. At the present time these are hard bounds. 
+
+**Figure. Common parameters for all acoustic events, using an oscillation event as example.**
+![Common parameters](./Images/Fig2.png)
+
 
 The above parameters are common to all target events. _Oscillations_ and _harmonics_, being more complex events, have additional parameters as described below. 
 
@@ -339,7 +345,8 @@ Profiles:
 
 > The optimum values for _DctDuration_ and _DctThreshold_ interact. It requires some experimentation to find the best values for your target syllable. Experiment with _DctDuration_ first while keeping the _DctThreshold_ value low. Once you have a reliable value for _DctDuration_, gradually increase the value for _DctThreshold_.
  
-**_TODO_** include an image of the DCT applied to oscillations and harmonics 
+**Figure. Parameters required for using a DCT to detect an oscillation event.**
+![DCT parameters](./Images/DCTparameters.jpg)
 
 
 **_Harmonic Events_**
@@ -365,14 +372,14 @@ Profiles:
         # Event threshold - use this to determine FP/FN trade-off.
         EventThreshold: 0.5
 ```
-> Note there are only two parameters that are specific to _Harmonics_,  _MinFormantGap_ and _MaxFormantGap_. These specify the minimum and maximum allowed gap (measured in Hertz) between adjacent formants/harmonics. Note that for these purposes the terms _harmonic_ and _formant_ are equivalent. The DCT is performed over all bins in the search band.
+> Note there are only two parameters that are specific to _Harmonics_,  _MinFormantGap_ and _MaxFormantGap_. These specify the minimum and maximum allowed gap (measured in Hertz) between adjacent formants/harmonics. Note that for these purposes the terms _harmonic_ and _formant_ are equivalent. By default, the DCT is calculated over all bins in the search band.
 
-> Once again, the output from a DCT operation is an array of coefficients (taking values in [0, 1]). The index into the array is the gap between formants and the value at that index is the formant amplitude. The index with largest amplitude indicates the likely formant gap, but _DctThreshold_ sets the minimum acceptable amplitude value. Lowering _DctThreshold_ increases the likelihood that random noise will be accepted as a true set of formants; increasing _DctThreshold_ increases the likelihood that a target set of stacked harmonics is rejected.
+> Once again, the output from a DCT operation is an array of coefficients (taking values in [0, 1]). The index into the array is the gap between formants and the value at that index is the formant amplitude. The index with largest amplitude indicates the likely formant gap, but _DctThreshold_ sets the minimum acceptable amplitude value. Lowering _DctThreshold_ increases the likelihood that random noise will be accepted as a true set of formants; increasing _DctThreshold_ increases the likelihood that a target set of formants is rejected.
 
 
 
 ### Step 5. Combining syllables into calls
-Detection step 5 is the first of two *post-processing* steps. They both come under the keyword `PostProcessing`. Note that these post-processing steps are performed on all 'discovered" acoustic events collectively, i.e. all those obtained from all the *profiles* in the list of profiles. 
+Detection step 5 is the first of two *post-processing* steps. They both come under the keyword `PostProcessing`. Note that these post-processing steps are performed on all acoustic events collectively, i.e. all those "discovered" by all the *profiles* in the list of profiles. 
 
 **Step 5.1.** Combine overlapping events. (Note the indentation)
  ```yml
@@ -506,7 +513,7 @@ At this point you should have "captured" all the target calls/syllables (i.e. th
 
 At the end of this process, you are likely to have a mixture of true-positives, false-postives and false-negatives. The goal is to set the parameter values so that the combined FP+FN total is minimised. You should adjust parameter values so that the final FN/FP ratio reflects the relative costs of FN and FP errors. For example, lowering a decibel threshold may pick up more TPs but almost certainly at the cost of more FPs. 
 
-**NOTE:** A working DIY Call Recognizer can be built with just one example or training call. A machine learning algorithm requires typically 100 true and false examples. The price that you (the ecologist) pays for this simplicity is the need to exercise some of the "intelligence" that would otherwise be exercised by the machine learning algorithm. That is, you must select calls and set parameter values that reflect the variability of the target calls and the relative costs of FN and FP errors.
+> **NOTE:** A working DIY Call Recognizer can be built with just one example or training call. A machine learning algorithm typically requires 100 true and false examples. The price that you (the ecologist) pays for this simplicity is the need to exercise some of the "intelligence" that would otherwise be exercised by the machine learning algorithm. That is, you must select calls and set parameter values that reflect the variability of the target calls and the relative costs of FN and FP errors.
 
 .
 
@@ -528,7 +535,7 @@ We described above the various steps required to tune the parameter values in a 
 
 > **Step 6.** Repeat steps 3, 4 and 5 until you appear to have achieved the best possible accuracy. In order to minimise the number of iterations of stages 3 to 5, it is best to tune the configuration parameters in the sequence described in the previous section.
 
-> **Step 7.** At this point you should have a recognizer that performs "reasonably well" on your training examples. The next step is to test your recognizer on one or a few examples that it has not seen before. That is, repeat steps 3, 4, 5 and 6 adding in a new example each time as they become available. It is also useful at this stage to accumulate a set of recordings that do *not* contain the target call. See Section 10 for more suggestions on building datasets. 
+> **Step 7.** At this point you should have a recognizer that performs "as accurately as possible" on your training examples. The next step is to test your recognizer on one or a few examples that it has not seen before. That is, repeat steps 3, 4, 5 and 6 adding in a new example each time as they become available. It is also useful at this stage to accumulate a set of recordings that do *not* contain the target call. See Section 10 for more suggestions on building datasets. 
 
 > **Step 8:** At some point you are ready to use your recognizer on recordings obtained from the operational environment.
 
@@ -544,7 +551,7 @@ We described above the various steps required to tune the parameter values in a 
 In this section we only describe the command line for the _call recognizer_ action where:
 - action = "audio2csv".
 - arguments = three file paths, to an audio file, a config file and an output directory. 
-- options = short strings beginning with a `-` or `--` that influence `APexe`'s execution.
+- options = short strings beginning with a single or double hyphen (`-` or `--`) that influence `APexe`'s execution.
 
 Refer to other manuals [here](https://github.com/QutEcoacoustics/audio-analysis/blob/master/README.md) for a more complete description of `APexe`'s functionality. Note that the three file arguments must be in the order shown, that is: audio file, config file, output directory.
 
@@ -552,7 +559,7 @@ Refer to other manuals [here](https://github.com/QutEcoacoustics/audio-analysis/
 
     1. The debug/no-debug options: Use "-d" for debug or "-n" for no debugging.
     2. The verbosity options: "--quiet", "-v", "-vv", "-vvv" for different levels of verbosity.
-    3. The analysis-identifier option: Use "-a" or "--analysis-identifier" followed by the _analysis type_, which in the case of DIY call recognizers is "NameId.GenericRecognizer". This is a useful addition to the command line because it informs `APexe` that this as a call recognition task in case the config file is not named correctly.  
+    3. The analysis-identifier option: Use "-a" or "--analysis-identifier" followed by the <analysis type>, which in the case of DIY call recognizers is "NameId.GenericRecognizer". This is a useful addition to the command line because it informs `APexe` that this as a call recognition task in case the config file is not named correctly.  
     
 For other possible options, see the above referenced manual.
 
@@ -584,10 +591,3 @@ In order to facilitate the determination of recognizer performance on labelled d
 
 
 ==================================================================
-
-
-ADDITIONAL NOTES:
-
-![alt text](image.jpg)
-
-
